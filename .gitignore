@@ -1,0 +1,26 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Node (si build futur)
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+error_log
+
+# WordPress
+wp-config.php
+wp-content/uploads/
+
+# Env
+.env
+.env.*
