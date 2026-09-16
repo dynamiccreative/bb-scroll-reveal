@@ -1,5 +1,5 @@
 /*!
- * BB Scroll Reveal 1.7.3 — bleuebuzz
+ * BB Scroll Reveal 1.8.0 — bleuebuzz
  * Classes à poser dans Elementor > Avancé > Classes CSS :
  *   bb-reveal           élément révélé (fade + translation) une fois
  *   bb-reveal-children  enfants directs d'un conteneur révélés en cascade

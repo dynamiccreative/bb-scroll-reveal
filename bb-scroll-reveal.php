@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       BB Scroll Reveal
  * Description:       Révélations au scroll (GSAP + ScrollTrigger + SplitText, Lenis en option) pilotées par classes CSS dans Elementor.
- * Version:           1.7.3
+ * Version:           1.8.0
  * Author:            bleuebuzz
  * Requires at least: 6.3
  * Requires PHP:      7.4
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BB_REVEAL_VERSION', '1.7.3' );
+define( 'BB_REVEAL_VERSION', '1.8.0' );
 define( 'BB_REVEAL_GSAP_VERSION', '3.15.0' );
 define( 'BB_REVEAL_LENIS_VERSION', '1.3.26' );
 define( 'BB_REVEAL_URL', plugin_dir_url( __FILE__ ) );

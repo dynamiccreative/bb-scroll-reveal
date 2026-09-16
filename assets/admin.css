@@ -1,0 +1,457 @@
+/* ============================================================================
+   BB Scroll Reveal — page Réglages (Réglages > BB Scroll Reveal)
+   ----------------------------------------------------------------------------
+   Design system repris de DC Support Technique (préfixe `st-ui-`) : header de
+   marque, colonne d'onglets, cards, barre d'enregistrement collante, aside
+   contextuel. Seule la palette change — chaque plugin maison garde sa teinte.
+
+   Thème CLAIR uniquement : la page vit dans un wp-admin clair, un
+   `prefers-color-scheme: dark` ne teinterait que cette page.
+
+   Palette BB Scroll Reveal :
+     primary #4f46e5   indigo (actions, onglet actif, focus)
+     accent  #22d3ee   cyan   (halo du header, dégradé du logo)
+     ok #16a34a · warn #d97706 · danger #dc2626
+
+   Convention : classes préfixées `bbsr-`, actives sous le conteneur `.bbsr-ui`.
+   ========================================================================== */
+
+.bbsr-ui {
+	--bbsr-surface:   #ffffff;
+	--bbsr-surface-2: #fbfcfd;
+
+	--bbsr-primary:      #4f46e5;
+	--bbsr-primary-dark: #4338ca;
+	--bbsr-primary-soft: #eef0fe;
+	--bbsr-primary-line: #c9cdf7;
+	/* Teinte de halo/focus dérivée de --bbsr-primary, en RGB pour les rgba(). */
+	--bbsr-primary-rgb:  79, 70, 229;
+
+	--bbsr-accent:     #22d3ee;
+	--bbsr-accent-rgb: 34, 211, 238;
+
+	--bbsr-navy:      #2b2a63;
+	--bbsr-navy-deep: #171a2e;
+
+	--bbsr-green:  #16a34a;  --bbsr-green-soft:  #e7f6ec;
+	--bbsr-orange: #d97706;  --bbsr-orange-soft: #fbf1e2;
+	--bbsr-red:    #dc2626;  --bbsr-red-soft:    #fdeceb;
+
+	--bbsr-border:      #e7e9ee;
+	--bbsr-border-soft: #eef0f4;
+	--bbsr-text:  #1a2230;
+	--bbsr-ink-2: #384252;
+	--bbsr-muted: #667085;
+	--bbsr-faint: #8b95a4;
+
+	--bbsr-radius:    10px;
+	--bbsr-radius-sm: 7px;
+	--bbsr-radius-lg: 14px;
+
+	--bbsr-shadow-sm: 0 1px 2px rgba(16,24,40,.05);
+
+	--bbsr-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+	max-width: 1320px;
+	margin: 10px 20px 0 2px;
+	color: var(--bbsr-text);
+}
+.bbsr-ui *, .bbsr-ui *::before, .bbsr-ui *::after { box-sizing: border-box; }
+
+/* Fond général froid derrière les cards blanches. */
+#wpbody-content:has(.bbsr-ui) { background: #f6f7f9; }
+
+.bbsr-ui code {
+	font-family: var(--bbsr-mono);
+	font-size: 11px; background: #f1f3f7;
+	padding: 1px 5px; border-radius: 3px; color: #4b5563;
+}
+
+/* ===========================================================================
+   HEADER DE MARQUE
+   ========================================================================== */
+.bbsr-header {
+	/* Halo cyan posé en haut à droite du bleu profond : le titre et le logo
+	   restent à gauche, sur la partie sombre, où le blanc garde son contraste. */
+	background:
+		radial-gradient(125% 190% at 100% 0%, rgba(var(--bbsr-accent-rgb), .45) 0%, rgba(var(--bbsr-accent-rgb), 0) 62%),
+		linear-gradient(120deg, var(--bbsr-navy-deep) 0%, var(--bbsr-navy) 100%);
+	border-radius: var(--bbsr-radius-lg);
+	padding: 15px 22px;
+	display: flex; align-items: center; justify-content: space-between;
+	margin-bottom: 20px;
+	flex-wrap: wrap; gap: 14px;
+}
+.bbsr-header-left  { display: flex; align-items: center; gap: 13px; }
+.bbsr-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bbsr-logo {
+	width: 40px; height: 40px;
+	background: linear-gradient(135deg, var(--bbsr-accent), var(--bbsr-primary));
+	border-radius: 11px;
+	display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+	box-shadow: 0 4px 12px -3px rgba(var(--bbsr-accent-rgb), .5);
+}
+.bbsr-logo .dashicons { color: #fff; font-size: 21px; width: 21px; height: 21px; }
+.bbsr-header h1 {
+	font-size: 15px; font-weight: 650; color: #fff;
+	margin: 0 0 1px; padding: 0; line-height: 1.2; letter-spacing: .1px;
+}
+.bbsr-header p { font-size: 12px; color: rgba(255,255,255,.62); margin: 0; }
+
+.bbsr-pill {
+	font-size: 11px; padding: 5px 11px; border-radius: 20px;
+	font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+	border: 1px solid; background: rgba(23,26,46,.42);
+}
+.bbsr-pill.ok   { color: #b6f0be; border-color: rgba(156,232,163,.40); }
+.bbsr-pill.warn { color: #ffdcaa; border-color: rgba(245,166,35,.44); }
+.bbsr-pill .dashicons { font-size: 12px; width: 12px; height: 12px; }
+
+.bbsr-version {
+	background: rgba(23,26,46,.40); color: rgba(255,255,255,.80);
+	font-size: 11px; padding: 4px 10px; border-radius: 20px;
+	border: 1px solid rgba(255,255,255,.22);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ===========================================================================
+   LAYOUT — nav (gauche) · contenu · aside (droite)
+   ========================================================================== */
+.bbsr-layout {
+	display: grid;
+	grid-template-columns: 236px minmax(0,1fr) 288px;
+	gap: 22px; align-items: start;
+	padding-bottom: 88px; /* dégage la barre d'enregistrement fixe */
+}
+.bbsr-main    { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.bbsr-main form { display: flex; flex-direction: column; gap: 18px; }
+.bbsr-aside   { position: sticky; top: 34px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ===========================================================================
+   NAVIGATION
+   ========================================================================== */
+.bbsr-tabs { position: sticky; top: 34px; display: flex; flex-direction: column; gap: 20px; }
+.bbsr-nav-group { display: flex; flex-direction: column; gap: 2px; }
+.bbsr-nav-label {
+	font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase;
+	color: var(--bbsr-faint); padding: 0 11px 8px;
+}
+.bbsr-tab {
+	display: flex; align-items: center; gap: 10px;
+	padding: 8px 11px; border-radius: 9px;
+	font-size: 13px; font-weight: 550; color: var(--bbsr-ink-2);
+	text-decoration: none; cursor: pointer; border: 1px solid transparent;
+	transition: background .14s, color .14s, border-color .14s;
+}
+.bbsr-tab .dashicons { font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; color: var(--bbsr-faint); transition: color .14s; }
+.bbsr-tab-label { flex: 1; min-width: 0; }
+.bbsr-tab:hover  { background: var(--bbsr-surface); color: var(--bbsr-text); }
+.bbsr-tab:hover .dashicons { color: var(--bbsr-muted); }
+.bbsr-tab.active { background: var(--bbsr-primary-soft); color: var(--bbsr-primary); border-color: var(--bbsr-primary-line); font-weight: 650; }
+.bbsr-tab.active .dashicons { color: var(--bbsr-primary); }
+
+/* Nombre de réglages effectivement enregistrés dans l'onglet — le reste suit
+   les défauts du plugin. */
+.bbsr-tab-count {
+	flex-shrink: 0; font-size: 11px; font-weight: 600;
+	font-variant-numeric: tabular-nums; color: var(--bbsr-muted);
+	background: var(--bbsr-surface-2); border: 1px solid var(--bbsr-border);
+	border-radius: 20px; padding: 1px 7px;
+}
+.bbsr-tab.active .bbsr-tab-count { color: var(--bbsr-primary); border-color: var(--bbsr-primary-line); background: #fff; }
+
+/* ===========================================================================
+   PANNEAUX
+   ========================================================================== */
+.bbsr-panel { display: none; flex-direction: column; gap: 18px; }
+.bbsr-panel.active { display: flex; }
+
+.bbsr-pagehead { padding: 2px 2px 0; }
+.bbsr-pagehead h2 { font-size: 18px; font-weight: 680; letter-spacing: -.2px; margin: 0; color: var(--bbsr-text); text-wrap: balance; }
+.bbsr-pagehead p  { font-size: 13px; color: var(--bbsr-muted); margin: 3px 0 0; max-width: 62ch; line-height: 1.55; }
+
+/* ===========================================================================
+   CARDS
+   ========================================================================== */
+.bbsr-card {
+	background: var(--bbsr-surface); border: 1px solid var(--bbsr-border);
+	border-radius: var(--bbsr-radius-lg); overflow: hidden; box-shadow: var(--bbsr-shadow-sm);
+}
+.bbsr-card-sm { padding: 15px; }
+.bbsr-card-header {
+	display: flex; align-items: center; gap: 12px;
+	padding: 15px 18px; border-bottom: 1px solid var(--bbsr-border-soft);
+}
+.bbsr-card-icon {
+	width: 34px; height: 34px; border-radius: 9px;
+	display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+	background: var(--bbsr-primary-soft);
+}
+.bbsr-card-icon .dashicons { font-size: 17px; width: 17px; height: 17px; color: var(--bbsr-primary); }
+.bbsr-card-icon.green { background: var(--bbsr-green-soft); }
+.bbsr-card-icon.green .dashicons { color: var(--bbsr-green); }
+.bbsr-card-icon.amber { background: var(--bbsr-orange-soft); }
+.bbsr-card-icon.amber .dashicons { color: var(--bbsr-orange); }
+.bbsr-card-header h3 { font-size: 14px; font-weight: 640; color: var(--bbsr-text); margin: 0 0 2px; }
+.bbsr-card-header p  { font-size: 12px; color: var(--bbsr-muted); margin: 0; }
+.bbsr-card-body { padding: 18px; display: flex; flex-direction: column; gap: 18px; }
+
+/* ===========================================================================
+   CHAMPS
+   ========================================================================== */
+.bbsr-field { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.bbsr-field > label:not(.bbsr-switch) {
+	display: block; font-size: 12px; font-weight: 620;
+	color: var(--bbsr-ink-2); letter-spacing: .1px;
+}
+.bbsr-desc { font-size: 12px; color: var(--bbsr-muted); margin: 0; line-height: 1.55; max-width: 72ch; }
+.bbsr-desc code { font-size: 11px; }
+
+.bbsr-ui input[type="text"],
+.bbsr-ui input[type="number"],
+.bbsr-ui select,
+.bbsr-ui textarea {
+	box-sizing: border-box; width: 100%;
+	padding: 9px 12px;
+	/* `background-color` seul : le raccourci `background` effacerait le chevron
+	   dessiné en image de fond sur les <select>. */
+	background-color: var(--bbsr-surface);
+	border: 1px solid var(--bbsr-border);
+	box-shadow: var(--bbsr-shadow-sm);
+	border-radius: var(--bbsr-radius-sm);
+	color: var(--bbsr-ink-2); font-size: 13px; line-height: 1.4;
+	font-family: inherit;
+	transition: border-color .14s, box-shadow .14s;
+}
+.bbsr-ui input[type="number"] { max-width: 120px; font-variant-numeric: tabular-nums; }
+.bbsr-ui input[type="text"], .bbsr-ui select { max-width: 320px; }
+.bbsr-ui input:hover, .bbsr-ui select:hover, .bbsr-ui textarea:hover { border-color: #c3cbd6; }
+.bbsr-ui input:focus, .bbsr-ui select:focus, .bbsr-ui textarea:focus {
+	border-color: var(--bbsr-primary);
+	box-shadow: 0 0 0 3px rgba(var(--bbsr-primary-rgb), .16);
+	outline: none;
+}
+.bbsr-ui input::placeholder, .bbsr-ui textarea::placeholder { color: #a9b1bd; }
+
+/* Chevron des listes déroulantes, dessiné en CSS (indépendant du thème admin). */
+.bbsr-ui select {
+	-webkit-appearance: none; -moz-appearance: none; appearance: none;
+	padding-right: 34px; cursor: pointer;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23667085' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat; background-position: right 12px center; background-size: 12px 8px;
+}
+.bbsr-ui select::-ms-expand { display: none; }
+.bbsr-ui textarea { min-height: 96px; resize: vertical; font-family: var(--bbsr-mono); font-size: 12px; line-height: 1.6; }
+
+.bbsr-inline { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.bbsr-unit { font-size: 12px; color: var(--bbsr-muted); white-space: nowrap; }
+/* Repère de la valeur du code, à droite du champ : le filigrane disparaît dès
+   que le réglage est renseigné, ce rappel non. */
+.bbsr-default { font-size: 11px; color: var(--bbsr-faint); white-space: nowrap; }
+.bbsr-default b { font-weight: 600; color: var(--bbsr-muted); font-variant-numeric: tabular-nums; }
+
+/* --- Interrupteur --- */
+.bbsr-ui .bbsr-switch {
+	display: inline-flex; align-items: center; gap: 10px;
+	cursor: pointer; position: relative; margin: 0; font-weight: 400; flex-shrink: 0;
+}
+.bbsr-switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.bbsr-switch-track {
+	display: inline-block; width: 40px; height: 23px; border-radius: 20px;
+	background: #cbd1da; position: relative; transition: background .18s;
+	flex-shrink: 0; vertical-align: middle;
+}
+.bbsr-switch-track::after {
+	content: ''; position: absolute; top: 2px; left: 2px;
+	width: 19px; height: 19px; border-radius: 50%;
+	background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.28); transition: transform .18s;
+}
+.bbsr-switch input:checked + .bbsr-switch-track { background: var(--bbsr-green); }
+.bbsr-switch input:checked + .bbsr-switch-track::after { transform: translateX(17px); }
+.bbsr-switch input:focus-visible + .bbsr-switch-track { box-shadow: 0 0 0 3px rgba(var(--bbsr-primary-rgb), .28); }
+
+/* Ligne d'interrupteur : titre + aide à gauche, interrupteur à droite. */
+.bbsr-switch-row {
+	display: flex; align-items: center; justify-content: space-between; gap: 16px;
+	padding: 12px 15px; border: 1px solid var(--bbsr-border);
+	border-radius: var(--bbsr-radius); background: var(--bbsr-surface-2);
+}
+.bbsr-switch-tt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bbsr-switch-tt b { font-size: 13px; font-weight: 620; color: var(--bbsr-text); }
+.bbsr-switch-tt span { font-size: 12px; color: var(--bbsr-muted); line-height: 1.5; }
+
+/* Grille de champs courts (nombres) */
+.bbsr-cols { display: grid; gap: 18px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+
+/* ===========================================================================
+   BOUTONS
+   ========================================================================== */
+.bbsr-btn {
+	display: inline-flex; align-items: center; gap: 7px;
+	background: var(--bbsr-primary); border: 1px solid var(--bbsr-primary); color: #fff;
+	padding: 9px 17px; font-size: 13px; font-weight: 620;
+	border-radius: var(--bbsr-radius-sm); cursor: pointer; line-height: 1.4;
+	text-decoration: none; transition: all .14s; font-family: inherit;
+}
+.bbsr-btn:hover { background: var(--bbsr-primary-dark); border-color: var(--bbsr-primary-dark); color: #fff; }
+.bbsr-btn .dashicons { font-size: 14px; width: 14px; height: 14px; }
+.bbsr-btn-ghost { background: transparent; color: var(--bbsr-muted); border-color: var(--bbsr-border); }
+.bbsr-btn-ghost:hover { background: transparent; color: var(--bbsr-text); border-color: var(--bbsr-muted); }
+.bbsr-btn-danger { width: 100%; justify-content: center; background: #fff; color: var(--bbsr-red); border-color: #f2c3c2; }
+.bbsr-btn-danger:hover { background: var(--bbsr-red-soft); border-color: var(--bbsr-red); color: #b91c1c; }
+
+/* Contour de focus net, sans le halo par défaut de wp-admin. */
+.bbsr-ui a:focus, .bbsr-ui button:focus { box-shadow: none; outline: none; }
+.bbsr-ui a:focus-visible, .bbsr-ui button:focus-visible { outline: 2px solid var(--bbsr-primary); outline-offset: 2px; box-shadow: none; }
+.bbsr-tab:focus { border-radius: 9px; color: var(--bbsr-ink-2); }
+.bbsr-tab.active:focus { color: var(--bbsr-primary); }
+
+/* ===========================================================================
+   BARRE D'ENREGISTREMENT COLLANTE
+   ========================================================================== */
+.bbsr-savebar {
+	/* Alignée sur la zone de contenu (#wpcontent), pas sur la fenêtre : `left`
+	   suit les états du menu WP (déplié 160px, replié 36px, off-canvas 0). */
+	position: fixed; left: 160px; right: 0; bottom: 0; z-index: 40;
+	display: flex; align-items: center; justify-content: space-between; gap: 16px;
+	padding: 11px 20px;
+	background: rgba(255,255,255,.92);
+	backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+	border-top: 1px solid var(--bbsr-border);
+	box-shadow: 0 -6px 24px -12px rgba(16,24,40,.18);
+}
+body.folded .bbsr-savebar { left: 36px; }
+@media (max-width: 960px) { body.auto-fold .bbsr-savebar { left: 36px; } }
+.bbsr-savebar-state { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 550; }
+.bbsr-savebar-ic {
+	width: 22px; height: 22px; border-radius: 50%;
+	display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.bbsr-savebar-ic .dashicons { font-size: 13px; width: 13px; height: 13px; color: #fff; }
+.bbsr-savebar-acts { display: flex; align-items: center; gap: 10px; }
+
+.bbsr-savebar[data-dirty="false"] .bbsr-savebar-ic { background: var(--bbsr-green); }
+.bbsr-savebar[data-dirty="false"] .bbsr-savebar-state { color: var(--bbsr-muted); }
+.bbsr-savebar[data-dirty="false"] .bbsr-savebar-dirty { display: none; }
+.bbsr-savebar[data-dirty="false"] .bbsr-savebar-acts { opacity: .45; pointer-events: none; }
+
+.bbsr-savebar[data-dirty="true"] .bbsr-savebar-ic { background: var(--bbsr-orange); }
+.bbsr-savebar[data-dirty="true"] .bbsr-savebar-state { color: var(--bbsr-text); }
+.bbsr-savebar[data-dirty="true"] .bbsr-savebar-clean { display: none; }
+
+/* ===========================================================================
+   ÉTATS & ENCARTS
+   ========================================================================== */
+.bbsr-status {
+	display: flex; align-items: center; gap: 9px;
+	padding: 8px 10px; border-radius: var(--bbsr-radius-sm);
+	font-size: 12px; border: 1px solid transparent; flex-wrap: wrap;
+}
+.bbsr-status + .bbsr-status { margin-top: 8px; }
+.bbsr-status.ok   { background: var(--bbsr-green-soft);  border-color: #a8d5b5; color: #1e6b3a; }
+.bbsr-status.warn { background: var(--bbsr-orange-soft); border-color: #ffe0a3; color: #a37000; }
+.bbsr-status.idle { background: #f5f5f5;                 border-color: #ddd;    color: #7b8492; }
+.bbsr-status .dashicons { font-size: 15px; width: 15px; height: 15px; flex-shrink: 0; align-self: flex-start; margin-top: 1px; }
+.bbsr-status > span:last-child { flex: 1; min-width: 0; line-height: 1.55; }
+
+.bbsr-callout {
+	padding: 13px 15px; border-radius: var(--bbsr-radius);
+	border-left: 3px solid var(--bbsr-primary); background: var(--bbsr-primary-soft);
+	font-size: 12px; color: #2f2b6b; line-height: 1.65;
+}
+.bbsr-callout.warn { border-left-color: var(--bbsr-orange); background: var(--bbsr-orange-soft); color: #6b4e00; }
+.bbsr-callout strong { display: block; margin-bottom: 3px; }
+.bbsr-callout code { background: rgba(255,255,255,.65); }
+
+/* ===========================================================================
+   ASIDE
+   ========================================================================== */
+.bbsr-aside-title {
+	font-size: 12px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
+	color: var(--bbsr-faint);
+	display: flex; align-items: center; gap: 7px; margin: 0 0 12px;
+}
+.bbsr-aside-title .dashicons { font-size: 14px; width: 14px; height: 14px; color: var(--bbsr-faint); }
+.bbsr-help { display: none; }
+.bbsr-help.active { display: block; }
+.bbsr-help p { font-size: 12px; color: var(--bbsr-muted); line-height: 1.65; margin: 0 0 10px; }
+.bbsr-help p:last-child { margin-bottom: 0; }
+.bbsr-help strong { color: var(--bbsr-ink-2); }
+.bbsr-aside-note { font-size: 11px; color: var(--bbsr-faint); line-height: 1.55; margin: 10px 0 0; }
+
+/* ===========================================================================
+   RÉFÉRENCE (classes et attributs, en lecture seule)
+   ========================================================================== */
+.bbsr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bbsr-table th {
+	text-align: left; padding: 9px 12px; background: var(--bbsr-surface-2);
+	color: var(--bbsr-muted); font-weight: 600; font-size: 11px;
+	text-transform: uppercase; letter-spacing: .4px;
+	border-bottom: 1px solid var(--bbsr-border);
+}
+.bbsr-table td { padding: 9px 12px; border-bottom: 1px solid var(--bbsr-border-soft); color: var(--bbsr-ink-2); vertical-align: top; line-height: 1.55; }
+.bbsr-table tr:last-child td { border-bottom: none; }
+.bbsr-table tbody tr:hover { background: #fafbfc; }
+.bbsr-table td:first-child { width: 270px; white-space: nowrap; }
+.bbsr-table code { white-space: nowrap; }
+.bbsr-card > .bbsr-table { border-top: 0; }
+
+/* Vignette : le sprite est posé une fois en tête de l'onglet, chaque ligne s'y
+   réfère par <use>. Le tracé suit `currentColor`, donc la teinte de la famille
+   (data-tone) colore le picto et son fond d'un seul geste. */
+.bbsr-sprite { display: none; }
+.bbsr-table td.bbsr-name { display: flex; align-items: center; gap: 11px; }
+.bbsr-ico {
+	width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0;
+	display: inline-flex; align-items: center; justify-content: center;
+	background: var(--bbsr-primary-soft); color: var(--bbsr-primary);
+}
+.bbsr-ico svg {
+	width: 22px; height: 22px;
+	fill: none; stroke: currentColor; stroke-width: 1.7;
+	stroke-linecap: round; stroke-linejoin: round;
+}
+.bbsr-ico[data-tone="cyan"]   { background: #e0f6fb; color: #0e7490; }
+.bbsr-ico[data-tone="amber"]  { background: var(--bbsr-orange-soft); color: #b45309; }
+.bbsr-ico[data-tone="green"]  { background: var(--bbsr-green-soft);  color: #15803d; }
+.bbsr-ico[data-tone="violet"] { background: #f3e9fd; color: #7c3aed; }
+
+/* Légende des teintes, sous les deux tables. */
+.bbsr-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 2px; font-size: 11px; color: var(--bbsr-faint); }
+.bbsr-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.bbsr-legend i { width: 9px; height: 9px; border-radius: 3px; background: var(--bbsr-primary); }
+.bbsr-legend [data-tone="cyan"] i   { background: #0e7490; }
+.bbsr-legend [data-tone="amber"] i  { background: #b45309; }
+.bbsr-legend [data-tone="green"] i  { background: #15803d; }
+.bbsr-legend [data-tone="violet"] i { background: #7c3aed; }
+
+/* ===========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 1240px) {
+	.bbsr-layout { grid-template-columns: 220px minmax(0,1fr); }
+	.bbsr-aside  { display: none; }
+}
+@media (max-width: 860px) {
+	.bbsr-layout { grid-template-columns: 1fr; padding-bottom: 92px; }
+	/* Onglets repliés en pills horizontales, groupes empilés. */
+	.bbsr-tabs { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
+	.bbsr-nav-group { flex-direction: row; flex-wrap: wrap; gap: 6px; align-items: center; }
+	.bbsr-nav-label { width: 100%; padding: 4px 2px 2px; }
+	.bbsr-tab { border-radius: 20px; }
+}
+@media (max-width: 782px) {
+	.bbsr-ui { margin: 10px 12px 0 2px; }
+	.bbsr-header { padding: 14px 16px; }
+	.bbsr-card-body { padding: 15px 16px; }
+	.bbsr-ui input[type="text"], .bbsr-ui select { max-width: 100%; }
+	.bbsr-cols { grid-template-columns: 1fr; }
+	.bbsr-table td:first-child { width: auto; white-space: normal; }
+	.bbsr-savebar,
+	body.folded .bbsr-savebar,
+	body.auto-fold .bbsr-savebar { left: 0; padding: 10px 16px; }
+	.bbsr-savebar-state { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.bbsr-ui * { transition: none !important; }
+}

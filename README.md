@@ -201,6 +201,8 @@ Les paramètres du filtre sont exprimés dans un viewBox de largeur 1000, donc l
 
 **Réglages > BB Scroll Reveal** (capacité `manage_options`). Tous les réglages globaux y sont accessibles sans passer par `functions.php`.
 
+La page est organisée en onglets (colonne de gauche), un par famille de réglages, plus un onglet **Classes et attributs** qui rappelle en lecture seule ce qui se règle dans Elementor. Une barre d'enregistrement reste collée en bas de l'écran et signale les modifications non enregistrées ; la colonne de droite donne l'aide de l'onglet en cours, l'état du front (animations, Lenis, GSAP, pages exclues) et le bouton de réinitialisation. Les onglets ne sont qu'un affichage : tous les champs appartiennent au même formulaire, donc un enregistrement porte sur la page entière.
+
 Le principe : **un champ laissé vide garde la valeur par défaut du plugin**, affichée en filigrane. L'option ne stocke que ce qui est effectivement renseigné, donc les défauts du code restent la référence et évoluent avec les mises à jour.
 
 L'ordre de résolution est le suivant, du plus faible au plus fort :
@@ -219,6 +221,7 @@ Un `add_filter( 'bb_reveal_config', … )` dans le thème **écrase donc toujour
 | Révélations | `y`, `duration`, `stagger`, `ease`, `start` |
 | Défilement | Lenis (`smooth`, `lerp`, sensibilité molette), `normalizeScroll` |
 | Sections épinglées | `stepsBreakpoint`, `stepsOffset` |
+| Défilement horizontal | `hscrollBreakpoint` |
 
 Trois réglages n'ont pas d'équivalent dans `bb_reveal_config` :
 
@@ -228,7 +231,7 @@ Trois réglages n'ont pas d'équivalent dans `bb_reveal_config` :
 
 Une valeur hors bornes ou invalide est refusée à l'enregistrement, avec un message nommant le réglage : elle n'est pas stockée, donc le défaut s'applique. Le bouton **Réinitialiser** supprime l'option et rend la main aux défauts du code.
 
-Les réglages **par élément** (classes et attributs `data-bb-*`) ne passent pas par cette page : ils se posent dans Elementor. La page les rappelle en bas, en lecture seule.
+Les réglages **par élément** (classes et attributs `data-bb-*`) ne passent pas par cette page : ils se posent dans Elementor. L'onglet **Classes et attributs** les rappelle, en lecture seule.
 
 ## Configuration globale
 
@@ -266,6 +269,11 @@ Un seul des deux suffit ; `normalizeScroll` est ignoré si `smooth` est actif.
 - **Performance** : seules `transform` et `opacity` sont animées. Éviter `bb-scrub` / `bb-parallax` sur des dizaines d'éléments d'une même page.
 
 ## Historique
+
+**1.8.0**
+- Refonte de la page de réglages sur le design system des plugins maison (celui de DC Support Technique) : header de marque, onglets en colonne, cards, interrupteurs, barre d'enregistrement collante avec état « modifications non enregistrées », colonne d'aide contextuelle et état du front.
+- Onglet **Classes et attributs** : le rappel des classes et des `data-bb-*` a sa propre page au lieu d'être empilé sous le formulaire. Chaque entrée porte un pictogramme (SVG inline, sprite unique) dont la teinte dit la famille — révélations, effets liés au scroll, sections épinglées, défilement horizontal, tache d'encre. Réinitialisation déplacée dans la colonne de droite.
+- Deux fichiers d'assets admin (`assets/admin.css`, `assets/admin.js`, chargés uniquement sur la page de réglages). Aucun changement de comportement sur le front : `window.BB_REVEAL`, la sanitisation et l'ordre de résolution des réglages sont inchangés.
 
 **1.7.3**
 - `bb-hscroll` : avertissement console quand le conteneur piste a un padding horizontal (valeur par défaut des conteneurs Elementor), qui se lit comme un vide au début et à la fin du défilement.

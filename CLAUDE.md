@@ -8,6 +8,8 @@ Plugin WordPress bleuebuzz : révélations au scroll (GSAP 3.15 + ScrollTrigger 
 |---|---|
 | `bb-scroll-reveal.php` | Bootstrap : `bb_reveal_config()` (défauts + filtre), script/CSS de garde anti-flash dans `wp_head`, enqueue des vendors et de `bb-reveal.js`, injection de `window.BB_REVEAL` (config JSON). |
 | `assets/bb-reveal.js` | Toute la logique front. Lit `window.BB_REVEAL` fusionné avec ses propres défauts (`cfg`). Ne pas y ajouter de dépendance à l'admin. |
+| `includes/class-bb-reveal-settings.php` | Page **Réglages > BB Scroll Reveal** (Settings API + rendu maison : onglets, cards, barre d'enregistrement). |
+| `assets/admin.css`, `assets/admin.js` | Habillage de la page de réglages (préfixe `bbsr-`, design system des plugins maison). Chargés uniquement sur cette page. |
 | `assets/vendor/` | gsap, ScrollTrigger, SplitText, lenis (+ lenis.css). Ne pas modifier. |
 | `README.md` | Documentation utilisateur (classes, attributs, prérequis, historique). À tenir à jour à chaque changement de comportement. |
 
