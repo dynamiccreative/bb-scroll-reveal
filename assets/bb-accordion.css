@@ -1,0 +1,239 @@
+/*!
+ * BB Scroll Reveal 1.9.1 — widgets « BB Liste dépliante » / « BB Image liée »
+ * Préfixe : bb-acc-. Chargé uniquement par ces deux widgets (get_style_depends).
+ */
+
+/* ---------------------------------------------------------------- Liste ---- */
+
+.bb-acc {
+	--bb-acc-divider-style: dotted;
+	--bb-acc-divider-color: #d8d6d0;
+	--bb-acc-divider-width: 1px;
+	--bb-acc-speed: 400ms;
+	/* power2.out : la course est répartie sur toute la durée. expo.out, essayé
+	   d'abord, place 80 % du mouvement dans les 100 premières ms puis traîne —
+	   l'ouverture et la fermeture simultanées se lisaient alors en deux temps. */
+	--bb-acc-ease: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.bb-acc-item {
+	border-bottom: var(--bb-acc-divider-width) var(--bb-acc-divider-style) var(--bb-acc-divider-color);
+}
+
+.bb-acc-title-wrap {
+	margin: 0;
+	padding: 0;
+	font: inherit;
+	color: inherit;
+}
+
+/* Le titre est un bouton : neutraliser l'habillage natif et celui du thème.
+   Une seule classe ici : marge, fond et contour se règlent dans Elementor, dont
+   les règles (deux classes) doivent toujours passer devant. */
+.bb-acc-head {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	width: 100%;
+	margin: 0;
+	padding: 24px 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+/* La couleur, elle, est portée par un sélecteur à deux classes : un
+   « button { color } » de thème — souvent chargé après — passait devant la règle
+   à une seule classe, et la variable posée par Elementor n'était jamais lue. */
+.bb-acc .bb-acc-head {
+	color: var(--bb-acc-title-color, inherit);
+}
+
+.bb-acc-head:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+.bb-acc-icon {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	font-size: 32px;
+	line-height: 1;
+	transition: color 0.25s ease;
+}
+
+.bb-acc-icon svg {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+.bb-acc-icon i {
+	font-size: inherit;
+}
+
+.bb-acc-title {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.bb-acc .bb-acc-title {
+	color: inherit;
+}
+
+.bb-acc-mark {
+	display: inline-flex;
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+	transition: color 0.25s ease, transform var(--bb-acc-speed) var(--bb-acc-ease);
+}
+
+.bb-acc-mark svg {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Plus / moins : le trait vertical se rétracte quand la ligne s'ouvre. */
+.bb-acc-mark-v {
+	transform-origin: 50% 50%;
+	transition: transform var(--bb-acc-speed) var(--bb-acc-ease);
+}
+
+.bb-acc-item.is-open .bb-acc-mark-v {
+	transform: scaleY(0);
+}
+
+.bb-acc-item.is-open .bb-acc-mark--chevron {
+	transform: rotate(180deg);
+}
+
+/* Dépliement « à la Heron » : un slideDown, c'est-à-dire UNE seule propriété
+   animée, la hauteur, et rien d'autre. La valeur est posée en pixels par le JS
+   (bb-accordion.js), qui écrit les hauteurs de départ et d'arrivée de toutes
+   les lignes concernées dans la même frame — la ligne qui s'ouvre et celle qui
+   se ferme partent donc au même instant.
+   La version précédente animait grid-template-rows de 0fr à 1fr : élégant, mais
+   l'interpolation des pistes flexibles n'est pas fiable partout, et là où elle
+   ne s'applique pas la hauteur saute pendant que l'opacité, elle, continue de
+   filer — d'où le mouvement en deux temps. */
+.bb-acc-panel {
+	height: 0;
+	overflow: hidden;
+	transition: height var(--bb-acc-speed) var(--bb-acc-ease);
+}
+
+/* Avant l'exécution du JS (et s'il ne s'exécute pas) : l'élément ouvert au
+   chargement est déployé. Ensuite les styles en ligne du JS font autorité. */
+.bb-acc-item.is-open > .bb-acc-panel {
+	height: auto;
+}
+
+/* Pas de fondu ni de translation : le contenu est révélé par le rognage, comme
+   un slideDown. visibility retire le contenu replié du parcours clavier et des
+   lecteurs d'écran, ce que le rognage seul ne fait pas ; sa durée est celle du
+   repli, pour que le texte reste visible pendant qu'il se referme. */
+.bb-acc-panel-inner {
+	padding: 0 0 24px;
+	visibility: hidden;
+	transition: visibility var(--bb-acc-speed);
+}
+
+.bb-acc-item.is-open .bb-acc-panel-inner {
+	visibility: visible;
+}
+
+.bb-acc-panel-inner > :last-child {
+	margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------- Cadre image ---- */
+
+/* Tant que la pile est dans la liste (JS non exécuté, ou aucun cadre lié sur la
+   page), elle ne doit pas s'afficher au milieu des lignes. */
+.bb-acc > .bb-acc-media {
+	display: none;
+}
+
+.bb-acc-media-box {
+	position: relative;
+	overflow: hidden;
+	aspect-ratio: var(--bb-acc-ratio, 4 / 5);
+}
+
+.bb-acc-media-box .bb-acc-media {
+	position: absolute;
+	inset: 0;
+}
+
+.bb-acc-media-item {
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	opacity: 0;
+	transition: opacity var(--bb-acc-fade, 400ms) ease, transform var(--bb-acc-fade, 400ms) ease;
+}
+
+.bb-acc-media-item.is-active {
+	opacity: 1;
+}
+
+.bb-acc-media-item img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: var(--bb-acc-fit, cover);
+}
+
+.bb-acc-media-box[data-bb-effect="up"] .bb-acc-media-item {
+	transform: translateY(6%);
+}
+
+/* Zoom : les valeurs de Heron (scale 1.04 → 1, 0,4 s, courbe ease). */
+.bb-acc-media-box[data-bb-effect="zoom"] .bb-acc-media-item {
+	transform: scale(1.04);
+}
+
+.bb-acc-media-box[data-bb-effect="up"] .bb-acc-media-item.is-active,
+.bb-acc-media-box[data-bb-effect="zoom"] .bb-acc-media-item.is-active {
+	transform: none;
+}
+
+.bb-acc-media-box[data-bb-effect="none"] .bb-acc-media-item {
+	transition: none;
+}
+
+/* Rappel affiché dans l'éditeur seulement, quand le cadre est encore vide. */
+.bb-acc-media-hint {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	padding: 24px;
+	border: 1px dashed currentColor;
+	opacity: 0.55;
+	font-size: 13px;
+	line-height: 1.5;
+	text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.bb-acc-head,
+	.bb-acc-panel,
+	.bb-acc-panel-inner,
+	.bb-acc-mark,
+	.bb-acc-mark-v,
+	.bb-acc-media-item {
+		transition: none;
+	}
+}

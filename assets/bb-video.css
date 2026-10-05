@@ -1,0 +1,36 @@
+/*!
+ * BB Scroll Reveal 1.10.0 — widget « BB Vidéo au scroll »
+ * Préfixe : bb-video-. Chargé uniquement par ce widget (get_style_depends).
+ * L'animation est dans bb-reveal.js (classe bb-video-scroll / cadre .bb-video-box).
+ */
+
+.bb-video-box {
+	position: relative;
+	overflow: hidden;
+	aspect-ratio: var(--bb-video-ratio, 16/9);
+	background-color: #000;
+}
+
+/* Plein écran : la hauteur est recalée par le JS sous le header fixe (calc(100svh - header)). */
+.bb-video-box[data-bb-fit] {
+	aspect-ratio: auto;
+	min-height: 100vh;
+	min-height: 100svh;
+}
+
+.bb-video-box video {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: var(--bb-video-fit, cover);
+}
+
+.bb-video-hint {
+	padding: 24px;
+	border: 1px dashed #c3c4c7;
+	color: #50575e;
+	font-size: 13px;
+	text-align: center;
+}

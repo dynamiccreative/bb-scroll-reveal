@@ -1,5 +1,5 @@
 /*!
- * BB Scroll Reveal 1.8.0 — bleuebuzz
+ * BB Scroll Reveal 1.10.0 — bleuebuzz
  * Classes à poser dans Elementor > Avancé > Classes CSS :
  *   bb-reveal           élément révélé (fade + translation) une fois
  *   bb-reveal-children  enfants directs d'un conteneur révélés en cascade
@@ -12,6 +12,9 @@
  *                       empilement vertical normal sous le breakpoint mobile
  *   bb-ink              conteneur de deux images : la seconde est révélée par une tache d'encre
  *                       qui grandit au scroll (masque SVG + turbulence, façon Heron)
+ *   bb-video-scroll     conteneur d'une vidéo hébergée (<video>) lue au fil du scroll, épinglé par défaut ;
+ *                       le widget « BB Vidéo au scroll » produit le même effet (.bb-video-box)
+ *   bb-video-text       texte superposé, affiché sur une plage de la vidéo (data-bb-at)
  * Réglages par élément (Elementor Pro > Avancé > Attributs) :
  *   data-bb-y, data-bb-duration, data-bb-delay, data-bb-stagger, data-bb-start, data-bb-parallax,
  *   data-bb-distance (bb-steps : % de hauteur d'écran scrollé par étape ;
@@ -27,6 +30,12 @@
  *                    progression de la section bb-steps parente, sinon du passage dans l'écran)
  *   data-bb-ink-origin ("x y" en %, centre de la tache, défaut "50 50"), data-bb-ink-scale (force du
  *                    déchiquetage, défaut 100), data-bb-ink-freq (grain, défaut 0.05), data-bb-ink-seed
+ *   bb-video-scroll : data-bb-distance (longueur de scroll, "1500px" ou % d'écran, défaut 300),
+ *                    data-bb-pin ("off" = pas d'épinglage, la vidéo suit son passage dans l'écran),
+ *                    data-bb-holds (arrêts sur image en % de la vidéo, "30, 70"), data-bb-hold (durée
+ *                    d'un arrêt en % de la vidéo, défaut 15), data-bb-controls (boutons lecture/pause),
+ *                    data-bb-preload ("stream" = pas de chargement complet en mémoire), data-bb-offset
+ *   bb-video-text   : data-bb-at ("20-45" : apparaît à 20 % de la vidéo, disparaît à 45 % ; "20" = reste)
  */
 (function () {
 	'use strict';
@@ -498,7 +507,7 @@
 					},
 					pin: true,
 					scrub: 0.6,
-					anticipatePin: 1,
+					anticipatePin: anticipate(),
 					invalidateOnRefresh: true
 				}
 			});
@@ -669,7 +678,8 @@
 				['.bb-step:not(.bb-reveal)', reveal],
 				['.bb-scrub', scrub],
 				['.bb-parallax', parallax],
-				['.bb-ink', ink]
+				['.bb-ink', ink],
+				[VIDEO_SEL, videoScroll]
 			];
 			pass.forEach(function (entry) {
 				Array.prototype.forEach.call(el.querySelectorAll(entry[0]), safe(entry[1]));
@@ -761,7 +771,7 @@
 					end: function () { return '+=' + Math.round(travel() * (distance / 100)); },
 					pin: true,
 					scrub: 0.6,
-					anticipatePin: 1,
+					anticipatePin: anticipate(),
 					invalidateOnRefresh: true
 				}
 			});
@@ -814,6 +824,184 @@
 			);
 		}
 
+		// ---- bb-video-scroll : lecture d'une vidéo pilotée par le scroll ---------------------------
+		// Principe : la vidéo n'est jamais « jouée ». Un timeline scrubé fait varier un témoin { t }
+		// de 0 à 1 (fraction de la vidéo), avec des paliers immobiles pour les arrêts sur image, et le
+		// ticker GSAP rapproche currentTime de cette cible. Une nouvelle recherche n'est lancée qu'une
+		// fois la précédente terminée : le navigateur n'empile pas de seeks qu'il ne pourrait pas
+		// afficher. La fluidité dépend surtout de l'encodage (une image clé par image, voir README).
+		var VIDEO_SEL = '.bb-video-scroll, .bb-video-box';
+
+		// Positions en % ("30, 70" ou "30-70") → fractions dans l'ordre saisi, bornées à [0, 1].
+		function fractions(raw) {
+			var out = [];
+			String(raw || '').split(/[\s,;-]+/).forEach(function (part) {
+				var v = parseFloat(part);
+				if (isFinite(v)) { out.push(Math.min(100, Math.max(0, v)) / 100); }
+			});
+			return out;
+		}
+
+		// Longueur de scroll : "1500px" en pixels, sinon un nombre lu en % de hauteur d'écran.
+		function videoDistance(raw) {
+			var px = /^\s*([\d.]+)\s*px\s*$/i.exec(raw || '');
+			if (px) { return Math.max(1, parseFloat(px[1])); }
+			var v = parseFloat(raw);
+			return window.innerHeight * (isFinite(v) && v > 0 ? v : 300) / 100;
+		}
+
+		function videoScroll(el) {
+			var box = el.classList.contains('bb-video-box') ? el : el.querySelector('.bb-video-box');
+			var outer = el.parentElement && el.parentElement.closest('.bb-video-scroll');
+			// Le cadre du widget dans un conteneur bb-video-scroll : c'est le conteneur qui est câblé (il
+			// épingle aussi les textes superposés), avec les réglages du widget en repli.
+			if (outer && el === box) { return; }
+			if (outer) {
+				if (window.console) { console.warn('[bb-reveal] .bb-video-scroll imbriquée ignorée : retirer la classe de', el); }
+				return;
+			}
+
+			var video = el.querySelector('video');
+			if (!video) {
+				if (window.console) { console.warn('[bb-reveal] .bb-video-scroll sans vidéo hébergée (<video>) : rien à piloter. YouTube et Vimeo ne sont pas pris en charge.', el); }
+				return;
+			}
+
+			var opts = Object.assign({}, box && box !== el ? box.dataset : {}, el.dataset);
+			var holds = fractions(opts.bbHolds).sort(function (a, b) { return a - b; });
+			var holdRaw = parseFloat(opts.bbHold);
+			var hold = (isFinite(holdRaw) ? Math.max(0, holdRaw) : 15) / 100;
+			// Dans une piste horizontale ou une section bb-steps, l'épinglage est déjà pris : la vidéo
+			// suit alors simplement son passage dans l'écran.
+			var host = hostTl;
+			var steps = el.closest('.bb-steps');
+			var pin = !host && !steps && opts.bbPin !== 'off';
+			var offset = topBarOffset(el);
+
+			if (box && 'bbFit' in box.dataset) { fitViewport(box, offset); }
+
+			// Muette et en ligne : condition pour que iOS accepte de la charger et de l'afficher sans geste.
+			video.muted = true;
+			video.defaultMuted = true;
+			video.playsInline = true;
+			video.setAttribute('muted', '');
+			video.setAttribute('playsinline', '');
+			video.setAttribute('webkit-playsinline', '');
+			video.autoplay = false;
+			video.removeAttribute('autoplay');
+			video.loop = false;
+			if (opts.bbControls !== undefined) { video.controls = opts.bbControls !== 'off' && opts.bbControls !== 'false'; }
+
+			var state = { t: 0 };
+			var current = -1; // position affichée (s), lissée vers la cible
+			var lastSet = -1; // dernière position demandée par nous, pour reconnaître une recherche de l'internaute
+			var manual = false; // lecture ou recherche lancée par l'internaute : le scroll reprend la main au prochain mouvement
+			var priming = false;
+
+			function takeOver() {
+				if (!manual) { return; }
+				manual = false;
+				if (!video.paused) { video.pause(); }
+				current = video.currentTime;
+			}
+
+			var st = pin ? {
+				trigger: el,
+				start: el.dataset.bbStart || (offset > 0 ? 'top ' + offset + 'px' : 'top top'),
+				end: function () { return '+=' + Math.round(videoDistance(opts.bbDistance)); },
+				pin: true,
+				scrub: true,
+				anticipatePin: anticipate(),
+				invalidateOnRefresh: true
+			} : scrubTrigger(el, host, el.dataset.bbStart || 'top bottom', 'bottom top', 'left right', 'right left');
+			if (!pin && steps) { st.pinnedContainer = steps; }
+			st.onUpdate = takeOver;
+
+			// Segments de lecture entrecoupés de paliers : un palier est un tween vide, la vidéo reste
+			// sur la même image pendant que le scroll avance.
+			var tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: st });
+			var prev = 0;
+			holds.forEach(function (h) {
+				if (h > prev) { tl.to(state, { t: h, duration: h - prev }); }
+				if (hold > 0) { tl.to({}, { duration: hold }); }
+				prev = h;
+			});
+			if (prev < 1) { tl.to(state, { t: 1, duration: 1 - prev }); }
+
+			// Position dans le timeline d'un instant de la vidéo : un texte calé sur un arrêt démarre
+			// avec le palier, et un texte qui se termine après un arrêt le traverse.
+			function at(f) {
+				var t = f;
+				holds.forEach(function (h) { if (h < f) { t += hold; } });
+				return t;
+			}
+			var fade = 0.04;
+			Array.prototype.forEach.call(el.querySelectorAll('.bb-video-text'), function (node) {
+				var range = fractions(node.dataset.bbAt || '0');
+				var a = range.length ? range[0] : 0;
+				tl.fromTo(node, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: fade }, at(a));
+				if (range.length > 1 && range[1] > a) {
+					tl.to(node, { autoAlpha: 0, y: -20, duration: fade }, Math.max(at(a) + fade, at(range[1]) - fade));
+				}
+			});
+
+			gsap.ticker.add(function () {
+				var d = video.duration;
+				if (manual || !d || !isFinite(d) || video.readyState < 1) { return; }
+				var target = Math.max(0, Math.min(d - 0.001, state.t * d));
+				current = current < 0 ? target : current + (target - current) * 0.25;
+				if (Math.abs(target - current) < 0.002) { current = target; }
+				if (video.seeking || Math.abs(video.currentTime - current) < 0.01) { return; }
+				lastSet = current;
+				video.currentTime = current;
+			});
+
+			video.addEventListener('play', function () { if (!priming) { manual = true; } });
+			video.addEventListener('seeking', function () {
+				if (lastSet >= 0 && Math.abs(video.currentTime - lastSet) > 0.05) { manual = true; }
+			});
+
+			// iOS ignore preload et ne charge rien avant une lecture : un play() muet suivi d'une pause
+			// suffit, sauf en mode économie d'énergie où il est refusé — d'où la reprise au premier toucher.
+			function prime() {
+				var p = null;
+				priming = true;
+				try { p = video.play(); } catch (e) { p = null; }
+				if (p && p.then) {
+					p.then(function () { video.pause(); priming = false; }, function () { priming = false; });
+				} else {
+					video.pause();
+					priming = false;
+				}
+			}
+			if (video.readyState < 2) { prime(); }
+			document.addEventListener('touchstart', function () { if (video.readyState < 2) { prime(); } }, { once: true, passive: true });
+
+			// Vidéo chargée entière en mémoire (blob) : la recherche ne dépend plus des requêtes partielles
+			// au serveur, c'est ce qui rend le scrub fluide. En cas d'échec (CORS, réseau), la vidéo reste
+			// lue en flux. data-bb-preload="stream" garde le flux d'emblée (vidéo très lourde).
+			var source = video.querySelector('source');
+			var src = video.getAttribute('src') ? video.src : (source ? source.src : '');
+			if (opts.bbPreload !== 'stream' && src && src.indexOf('blob:') !== 0 && window.fetch && window.URL && URL.createObjectURL) {
+				video.preload = 'metadata'; // pas de double téléchargement pendant le fetch
+				fetch(src, { credentials: 'same-origin' })
+					.then(function (r) {
+						if (!r.ok) { throw new Error('HTTP ' + r.status); }
+						return r.blob();
+					})
+					.then(function (blob) {
+						video.addEventListener('loadedmetadata', function () {
+							lastSet = -1;
+							if (video.readyState < 2) { prime(); }
+						}, { once: true });
+						video.src = URL.createObjectURL(blob); // l'attribut src prime sur les <source>
+					})
+					.catch(function () { video.preload = 'auto'; });
+			} else {
+				video.preload = 'auto';
+			}
+		}
+
 		function each(selector, fn) {
 			Array.prototype.forEach.call(document.querySelectorAll(selector), fn);
 		}
@@ -824,6 +1012,13 @@
 			return function (el) {
 				if (!el.closest('.bb-hscroll')) { fn(el); }
 			};
+		}
+
+		// anticipatePin pré-épingle la section selon la vitesse de scroll : utile en défilement natif
+		// (évite un flash à grande vitesse), mais avec Lenis il fige la section plusieurs dizaines de px
+		// avant son point de départ, d'où un saut visible à l'épinglage. Lenis lisse déjà le défilement.
+		function anticipate() {
+			return window.bbLenis ? 0 : 1;
 		}
 
 		// Firefox défile de façon asynchrone : un élément épinglé (position:fixed) est recalé une frame
@@ -877,6 +1072,7 @@
 			}
 			stepsSection(el);
 		})));
+		each(VIDEO_SEL, outsideTracks(safe(videoScroll)));
 		Array.prototype.forEach.call(document.querySelectorAll('.bb-step'), outsideTracks(function (step) {
 			if (!step.closest('.bb-steps')) { safe(reveal)(step); } // étape orpheline : simple révélation
 		}));

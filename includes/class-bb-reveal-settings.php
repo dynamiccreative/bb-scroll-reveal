@@ -700,7 +700,7 @@ final class BB_Reveal_Settings {
 	 * Rappel en lecture seule des réglages qui ne passent pas par cette page.
 	 * Le README reste la documentation de référence.
 	 *
-	 * Chaque ligne porte un pictogramme : dans une liste de vingt-trois entrées
+	 * Chaque ligne porte un pictogramme : dans une liste d'une trentaine d'entrées
 	 * qui se ressemblent toutes (« bb-… », « data-bb-… »), la vignette est ce qui
 	 * se retrouve à l'œil, et sa teinte dit à quelle famille l'entrée appartient.
 	 */
@@ -716,6 +716,8 @@ final class BB_Reveal_Settings {
 			'bb-hscroll'         => array( 'hscroll', 'green', __( 'section épinglée dont les panneaux défilent horizontalement', 'bb-scroll-reveal' ) ),
 			'bb-hpanel'          => array( 'hpanel', 'green', __( 'un panneau de la piste bb-hscroll parente', 'bb-scroll-reveal' ) ),
 			'bb-ink'             => array( 'ink', 'violet', __( 'seconde image révélée par une tache d\'encre', 'bb-scroll-reveal' ) ),
+			'bb-video-scroll'    => array( 'video', 'rose', __( 'conteneur d\'une vidéo hébergée lue au fil du scroll (ou widget BB Vidéo au scroll)', 'bb-scroll-reveal' ) ),
+			'bb-video-text'      => array( 'video-text', 'rose', __( 'texte superposé à la vidéo, sur une plage donnée (data-bb-at)', 'bb-scroll-reveal' ) ),
 		);
 
 		$attributes = array(
@@ -725,13 +727,18 @@ final class BB_Reveal_Settings {
 			'data-bb-stagger|0.15'  => array( 'cascade', 'indigo', __( 'décalage entre enfants', 'bb-scroll-reveal' ) ),
 			'data-bb-start|top 70%' => array( 'trigger', 'indigo', __( 'point de déclenchement', 'bb-scroll-reveal' ) ),
 			'data-bb-parallax|15'   => array( 'layers', 'cyan', __( 'amplitude de la parallaxe', 'bb-scroll-reveal' ) ),
-			'data-bb-distance|60'   => array( 'ruler', 'amber', __( 'bb-steps : hauteur d\'écran scrollée par étape, en % · bb-hscroll : longueur de scroll en % du déplacement horizontal', 'bb-scroll-reveal' ) ),
+			'data-bb-distance|60'   => array( 'ruler', 'amber', __( 'bb-steps : hauteur d\'écran scrollée par étape, en % · bb-hscroll : longueur de scroll en % du déplacement horizontal · bb-video-scroll : longueur de scroll en % d\'écran, ou en px (1500px)', 'bb-scroll-reveal' ) ),
 			'data-bb-mode|slide'    => array( 'slide', 'amber', __( 'bb-steps : les étapes montent du bas au lieu d\'un fondu', 'bb-scroll-reveal' ) ),
-			'data-bb-pin|top'       => array( 'pin', 'amber', __( 'bb-steps slide : épinglage plein écran', 'bb-scroll-reveal' ) ),
-			'data-bb-offset|96'     => array( 'offset', 'amber', __( 'bb-steps, bb-hscroll : hauteur du header fixe pour cette section', 'bb-scroll-reveal' ) ),
+			'data-bb-pin|top'       => array( 'pin', 'amber', __( 'bb-steps slide : épinglage plein écran · bb-video-scroll : off = pas d\'épinglage', 'bb-scroll-reveal' ) ),
+			'data-bb-offset|96'     => array( 'offset', 'amber', __( 'bb-steps, bb-hscroll, bb-video-scroll : hauteur du header fixe pour cette section', 'bb-scroll-reveal' ) ),
 			'data-bb-replay'        => array( 'replay', 'amber', __( 'bb-steps : rembobine les animations internes au retour', 'bb-scroll-reveal' ) ),
 			'data-bb-direction|rtl' => array( 'direction', 'green', __( 'bb-hscroll : défilement de droite à gauche', 'bb-scroll-reveal' ) ),
 			'data-bb-width|60vw'    => array( 'width', 'green', __( 'bb-hscroll : largeur des panneaux (vw, px, ou un nombre lu en vw)', 'bb-scroll-reveal' ) ),
+			'data-bb-holds|30, 70'   => array( 'hold', 'rose', __( 'bb-video-scroll : arrêts sur image, en % de la vidéo', 'bb-scroll-reveal' ) ),
+			'data-bb-hold|15'        => array( 'hourglass', 'rose', __( 'bb-video-scroll : durée d\'un arrêt, en % du scroll de la vidéo', 'bb-scroll-reveal' ) ),
+			'data-bb-at|20-45'       => array( 'video-text', 'rose', __( 'bb-video-text : plage d\'affichage, en % de la vidéo', 'bb-scroll-reveal' ) ),
+			'data-bb-controls'       => array( 'video', 'rose', __( 'bb-video-scroll : boutons lecture / pause en plus du scroll', 'bb-scroll-reveal' ) ),
+			'data-bb-preload|stream' => array( 'ruler', 'rose', __( 'bb-video-scroll : lecture en flux, sans chargement complet en mémoire', 'bb-scroll-reveal' ) ),
 		);
 		?>
 		<section class="bbsr-panel" data-bbsr-panel="reference" role="tabpanel" aria-labelledby="bbsr-tab-reference" hidden>
@@ -770,6 +777,7 @@ final class BB_Reveal_Settings {
 				<span data-tone="amber"><i></i><?php esc_html_e( 'Sections épinglées', 'bb-scroll-reveal' ); ?></span>
 				<span data-tone="green"><i></i><?php esc_html_e( 'Défilement horizontal', 'bb-scroll-reveal' ); ?></span>
 				<span data-tone="violet"><i></i><?php esc_html_e( 'Tache d\'encre', 'bb-scroll-reveal' ); ?></span>
+				<span data-tone="rose"><i></i><?php esc_html_e( 'Vidéo au scroll', 'bb-scroll-reveal' ); ?></span>
 			</p>
 		</section>
 		<?php
@@ -831,7 +839,10 @@ final class BB_Reveal_Settings {
 			<symbol id="bbsr-i-offset" viewBox="0 0 24 24"><rect x="3" y="3.2" width="18" height="3.8" rx="1.4" fill="currentColor" stroke="none"/><path d="M12 11.6V8"/><path d="M10.3 9.7 12 8l1.7 1.7"/><rect x="3" y="13" width="18" height="7.8" rx="2"/></symbol>
 			<symbol id="bbsr-i-replay" viewBox="0 0 24 24"><path d="M3.8 12a8.2 8.2 0 1 0 2.5-5.9"/><path d="M3.6 3.9v5h5"/></symbol>
 			<symbol id="bbsr-i-direction" viewBox="0 0 24 24"><path d="M3 9h18"/><path d="M6.6 5.4 3 9l3.6 3.6"/><path d="M21 15H3"/><path d="M17.4 11.4 21 15l-3.6 3.6"/></symbol>
-			<symbol id="bbsr-i-width" viewBox="0 0 24 24"><rect x="7" y="5.5" width="10" height="13" rx="1.8"/><path d="M3.6 12h2.4"/><path d="M18 12h2.4"/><path d="M5.4 10 3.4 12l2 2"/><path d="M18.6 10l2 2-2 2"/></symbol>
+			<symbol id="bbsr-i-video" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.2v5.6l4.6-2.8Z"/></symbol>
+			<symbol id="bbsr-i-video-text" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" opacity=".45"/><path d="M7 15.5h10"/><path d="M9 12h6"/></symbol>
+			<symbol id="bbsr-i-hold" viewBox="0 0 24 24"><path d="M3 12h4.5"/><path d="M16.5 12H21"/><path d="M10 8v8"/><path d="M14 8v8"/></symbol>
+			<symbol id="bbsr-i-width"viewBox="0 0 24 24"><rect x="7" y="5.5" width="10" height="13" rx="1.8"/><path d="M3.6 12h2.4"/><path d="M18 12h2.4"/><path d="M5.4 10 3.4 12l2 2"/><path d="M18.6 10l2 2-2 2"/></symbol>
 		</svg>
 		<?php
 	}

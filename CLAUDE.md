@@ -1,6 +1,8 @@
 # BB Scroll Reveal — contexte pour Claude Code
 
-Plugin WordPress bleuebuzz : révélations au scroll (GSAP 3.15 + ScrollTrigger + SplitText, Lenis) pilotées par des classes CSS posées dans Elementor. Aucun widget, aucun build : PHP + un fichier JS vanilla (ES5, pas de transpilation).
+Plugin WordPress bleuebuzz : révélations au scroll (GSAP 3.15 + ScrollTrigger + SplitText, Lenis) pilotées par des classes CSS posées dans Elementor. Aucun build : PHP + JS vanilla (ES5, pas de transpilation). Depuis la 1.9.0, un module
+de widgets Elementor optionnel (liste dépliante + image liée) s'ajoute par-dessus, chargé
+seulement si Elementor est actif ; le front « classes CSS » n'en dépend pas.
 
 ## Fichiers
 
@@ -10,6 +12,11 @@ Plugin WordPress bleuebuzz : révélations au scroll (GSAP 3.15 + ScrollTrigger 
 | `assets/bb-reveal.js` | Toute la logique front. Lit `window.BB_REVEAL` fusionné avec ses propres défauts (`cfg`). Ne pas y ajouter de dépendance à l'admin. |
 | `includes/class-bb-reveal-settings.php` | Page **Réglages > BB Scroll Reveal** (Settings API + rendu maison : onglets, cards, barre d'enregistrement). |
 | `assets/admin.css`, `assets/admin.js` | Habillage de la page de réglages (préfixe `bbsr-`, design system des plugins maison). Chargés uniquement sur cette page. |
+| `includes/elementor/class-bb-reveal-elementor.php` | Module de widgets Elementor : catégorie, enregistrement des widgets et des assets. Chargé depuis `bb-scroll-reveal.php` sur `plugins_loaded` (priorité 20) uniquement si `did_action( 'elementor/loaded' )`. |
+| `includes/elementor/widgets/class-bb-reveal-widget-accordion.php` | Widget « BB Liste dépliante » (`bb_accordion`) : répéteur titre/contenu/pictogramme/image. Rend aussi la pile d'images, déplacée ensuite dans le cadre image. |
+| `includes/elementor/widgets/class-bb-reveal-widget-accordion-media.php` | Widget « BB Image liée » (`bb_accordion_media`) : cadre image piloté par la liste de même identifiant de liaison. |
+| `includes/elementor/widgets/class-bb-reveal-widget-video-scroll.php` | Widget « BB Vidéo au scroll » (`bb_video_scroll`) : produit `.bb-video-box` + `<video>` et ses `data-bb-*` ; l'animation est celle de `bb-video-scroll` dans `bb-reveal.js`. Style : `assets/bb-video.css`. |
+| `assets/bb-accordion.css`, `assets/bb-accordion.js` | Front des deux widgets (préfixe `bb-acc-`). Chargés par `get_style_depends()` / `get_script_depends()`, éditeur compris. Indépendants de GSAP et de `bb-reveal.js`. |
 | `assets/vendor/` | gsap, ScrollTrigger, SplitText, lenis (+ lenis.css). Ne pas modifier. |
 | `README.md` | Documentation utilisateur (classes, attributs, prérequis, historique). À tenir à jour à chaque changement de comportement. |
 
@@ -18,7 +25,7 @@ Plugin WordPress bleuebuzz : révélations au scroll (GSAP 3.15 + ScrollTrigger 
 - PHP ≥ 7.4, WordPress ≥ 6.3. Fonctions préfixées `bb_reveal_`, constantes `BB_REVEAL_*`, text domain `bb-scroll-reveal`, `defined( 'ABSPATH' ) || exit`.
 - Style WordPress (tabulations, espaces dans les parenthèses, `esc_*` en sortie, nonce + capability en entrée). `php -l` doit passer.
 - JS : ES5 (`var`, `function`), pas de build. Tout réglage global transite par `window.BB_REVEAL` → `cfg`. Les réglages par élément passent par `data-bb-*` dans Elementor, jamais par l'admin.
-- Le numéro de version est à incrémenter à trois endroits : en-tête du plugin, `BB_REVEAL_VERSION`, en-tête de `bb-reveal.js`. Ajouter une entrée dans « Historique » du README.
+- Le numéro de version est à incrémenter à trois endroits : en-tête du plugin, `BB_REVEAL_VERSION`, en-tête de `bb-reveal.js` (et, quand ils changent, les en-têtes de `bb-accordion.css` / `bb-accordion.js`). Ajouter une entrée dans « Historique » du README.
 - Ne jamais casser le filtre `bb_reveal_config` : du code dans un thème peut s'en servir.
 
 ## Clés de configuration (`bb_reveal_config()`)

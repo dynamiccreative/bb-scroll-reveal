@@ -22,6 +22,8 @@ Onglet **Avancé > Classes CSS** de l'élément :
 | `bb-hscroll` | section épinglée dont les panneaux défilent horizontalement | conteneur de la section entière |
 | `bb-hpanel` | un panneau de la piste `bb-hscroll` parente | chaque conteneur panneau |
 | `bb-ink` | seconde image révélée par une tache d'encre au scroll | conteneur de deux widgets Image |
+| `bb-video-scroll` | vidéo hébergée lue au fil du scroll, épinglée | conteneur d'un widget Vidéo auto-hébergée (ou widget BB Vidéo au scroll) |
+| `bb-video-text` | texte superposé à la vidéo, sur une plage donnée | widget texte dans le conteneur `bb-video-scroll` |
 
 Réglages fins par élément (Elementor Pro, **Avancé > Attributs**, une ligne par attribut) :
 
@@ -197,6 +199,131 @@ Réglages (attributs sur le conteneur `bb-ink`) :
 
 Les paramètres du filtre sont exprimés dans un viewBox de largeur 1000, donc le rendu est identique quelle que soit la largeur affichée. Le filtre SVG coûte du GPU : une tache par écran, pas dix.
 
+## Vidéo lue au scroll (bb-video-scroll)
+
+Une vidéo hébergée sur le site avance quand on scrolle vers le bas et recule quand on remonte, au lieu d'être lue par un bouton. Par défaut, la vidéo reste épinglée à l'écran le temps de sa lecture.
+
+Deux façons de la mettre en place, qui produisent exactement le même effet :
+
+- **Widget « BB Vidéo au scroll »** (catégorie bleuebuzz, si Elementor est actif) : choix de la vidéo dans la médiathèque ou par URL, épinglage, longueur de scroll, plein écran, arrêts sur image, boutons lecture/pause.
+- **Classe `bb-video-scroll`** sur un conteneur qui contient un widget Vidéo d'Elementor en mode « Auto-hébergée ».
+
+**Uniquement des fichiers MP4 ou WebM.** YouTube et Vimeo ne permettent pas d'afficher la vidéo image par image : le résultat saccade, donc ils ne sont pas pris en charge.
+
+### Encodage de la vidéo : indispensable
+
+Un MP4 classique ne contient une image complète (image clé) que toutes les quelques secondes. Entre deux, le navigateur doit recalculer chaque image depuis la précédente image clé : en lecture normale ça ne se voit pas, mais quand on scrolle, la vidéo saccade, surtout sous Safari. Il faut ré-encoder avec une image clé sur chaque image :
+
+```
+ffmpeg -i source.mp4 -an -g 1 -crf 23 -movflags +faststart video.mp4
+```
+
+- `-g 1` : une image clé par image (le réglage qui compte).
+- `-an` : retire le son (la vidéo est de toute façon muette).
+- `-crf 23` : qualité ; monter à 26-28 si le fichier est trop lourd.
+- Viser 1280 ou 1920 px de large, 24 à 30 images par seconde, et une vidéo courte (5 à 15 s). Ajouter `-vf scale=1280:-2` pour redimensionner.
+
+Le fichier sera plus lourd qu'un MP4 classique, c'est normal.
+
+### Réglages (attributs sur le conteneur `bb-video-scroll`)
+
+- `data-bb-distance|300` : scroll nécessaire pour lire toute la vidéo, en % de hauteur d'écran (300 = trois écrans), ou en pixels avec `1500px`.
+- `data-bb-pin|off` : pas d'épinglage. La vidéo se lit pendant qu'elle traverse l'écran, du moment où son haut entre en bas de l'écran à celui où son bas sort en haut.
+- `data-bb-holds|30, 70` : arrêts sur image à 30 % et 70 % de la vidéo. La vidéo reste figée pendant qu'on continue de scroller, le temps de lire un texte par exemple.
+- `data-bb-hold|15` : durée de chaque arrêt, en % du scroll de la vidéo entière (défaut 15).
+- `data-bb-controls` : affiche les boutons lecture/pause. L'internaute peut lire la vidéo normalement ; le scroll reprend la main au mouvement suivant.
+- `data-bb-preload|stream` : voir « Chargement » ci-dessous.
+- `data-bb-offset|96` : hauteur du header fixe, comme pour les sections épinglées (détectée automatiquement sinon).
+- `data-bb-start|top 100px` : point de départ de l'épinglage, si le calcul automatique ne convient pas.
+
+### Textes superposés (bb-video-text)
+
+Dans un conteneur `bb-video-scroll`, un élément avec la classe `bb-video-text` apparaît et disparaît à des moments précis de la vidéo :
+
+- `data-bb-at|20-45` : apparaît à 20 % de la vidéo, disparaît à 45 %.
+- `data-bb-at|60` : apparaît à 60 % et reste affiché jusqu'à la fin.
+
+Un texte calé sur un arrêt sur image (`data-bb-holds|30` et `data-bb-at|30-40`) apparaît au début de l'arrêt et reste affiché pendant toute sa durée.
+
+Le positionnement par-dessus la vidéo se règle dans Elementor : Avancé > Position « Absolue » sur le widget texte. Exemple de structure :
+
+```
+Conteneur (hauteur 100vh, padding 0)   → classe bb-video-scroll
+├── Vidéo (auto-hébergée) ou BB Vidéo au scroll
+├── Titre (position absolue)           → classe bb-video-text, data-bb-at|10-35
+└── Texte (position absolue)           → classe bb-video-text, data-bb-at|55
+```
+
+Quand le widget « BB Vidéo au scroll » est placé dans un conteneur `bb-video-scroll`, c'est le conteneur qui est épinglé (avec les textes), et les réglages du widget s'appliquent sauf si le conteneur porte le même attribut.
+
+### Chargement
+
+Par défaut, la vidéo est téléchargée entière en mémoire avant d'être pilotée. Le navigateur n'a ainsi plus à interroger le serveur à chaque saut dans la vidéo : c'est ce qui rend le scrub fluide. Il faut pour cela que la vidéo soit sur le même domaine que le site, ou servie par un CDN avec les en-têtes CORS ; sinon, elle est lue en flux, sans erreur. Pour une vidéo très lourde (plus de 30 à 40 Mo), `data-bb-preload|stream` (ou « En flux » dans le widget) évite de la garder en mémoire.
+
+Sur iPhone, la vidéo est forcément muette et lue en ligne (le plugin pose `muted` et `playsinline`). En mode économie d'énergie, iOS bloque le chargement jusqu'au premier toucher de l'écran : la vidéo s'affiche alors au premier geste.
+
+### Limites
+
+- Dans une section `bb-steps` ou une piste `bb-hscroll`, l'épinglage est déjà pris : la vidéo suit simplement son passage dans l'écran (`data-bb-pin|off` implicite).
+- Un `bb-video-scroll` imbriqué dans un autre est ignoré (avertissement dans la console).
+- Avec « Réduire les animations » activé dans le système, ou dans l'éditeur Elementor, la vidéo n'est pas pilotée : elle reste sur sa première image (ou affiche ses boutons si l'option est cochée).
+- Une vidéo par écran : chaque vidéo pilotée sollicite le décodeur en continu pendant le scroll.
+
+## Widgets Elementor : liste dépliante + image liée
+
+Un module de widgets, **chargé uniquement si Elementor est actif**. Rien d'autre dans le plugin n'en dépend : sans Elementor, le comportement est inchangé.
+
+Deux widgets, catégorie **bleuebuzz** du panneau Elementor :
+
+| Widget | Rôle |
+|---|---|
+| **BB Liste dépliante** (`bb_accordion`) | la liste d'items dépliants : titre, pictogramme, contenu, **et l'image liée de chaque item** |
+| **BB Image liée** (`bb_accordion_media`) | le cadre où s'affiche l'image de l'item ouvert |
+
+### Pourquoi deux widgets
+
+Le modèle (Heron, blocs `home-usecase-faq-list` / `home-usecase-img`) place la liste et l'image dans deux colonnes distinctes, avec du contenu libre au-dessus de la liste (sur-titre, titre, paragraphes, bouton). Un widget unique imposerait sa propre mise en page à deux colonnes ; en deux widgets, la mise en page reste entièrement celle d'Elementor : conteneur, colonnes, ordre, responsive, contenu libre au-dessus ou en dessous de chacun.
+
+### Les raccorder
+
+Les deux widgets portent un champ **Identifiant de liaison**, `default` par défaut : poser un widget de chaque suffit, ils se trouvent. Pour plusieurs paires sur une même page, donner un identifiant distinct à chaque paire (`metiers`, `services`…). L'identifiant est réduit à un slug (minuscules, chiffres, tirets).
+
+**Les images ne se saisissent qu'une fois, dans la liste** : chaque item du répéteur porte son image. La liste rend la pile d'images (masquée), que le JS déplace dans le cadre de même identifiant au chargement. Aucun risque de décalage entre l'ordre des items et l'ordre des images, et un item ajouté ou déplacé n'oblige pas à retoucher le cadre image.
+
+### Mise en page type
+
+```
+Conteneur (flex, 2 colonnes)
+├── Colonne 1
+│   └── BB Image liée            ← « Occuper toute la hauteur du conteneur »
+└── Colonne 2
+    ├── Titre                    (widgets Elementor libres)
+    ├── Éditeur de texte
+    ├── Bouton
+    └── BB Liste dépliante
+```
+
+### Réglages de la liste
+
+- **Éléments** : répéteur (titre, contenu WYSIWYG, pictogramme, image liée) et taille des images.
+- **Comportement** : identifiant de liaison, ouverture (un seul élément / plusieurs), « toujours un élément ouvert » (un clic sur l'élément ouvert ne le referme pas, l'image reste cohérente), élément ouvert au chargement (`0` = aucun), aperçu au survol (le survol change l'image sans déplier), balise des titres, indicateur (plus/moins, chevron, aucun).
+- **Style** : marges des lignes, séparateurs (style, couleur, épaisseur, séparateur haut), titres (typographie, couleur du texte, fond, contour — type, épaisseur, couleur — et rayon des angles ; texte, fond et couleur du contour déclinés en normal / survol / ouvert), contenu déplié (typographie, couleur du texte, fond, marge, durée **et courbe** du dépliement), pictogrammes et indicateur.
+
+### Réglages du cadre image
+
+Identifiant de liaison, image de repli (affichée tant qu'aucun élément n'est ouvert), transition (fondu + zoom façon Heron par défaut, fondu, fondu + montée, aucune) et sa durée (0,4 s par défaut, la valeur de Heron), proportions, hauteur minimale, pleine hauteur, cadrage `cover`/`contain`, fond, angles, bordure, ombre.
+
+### Points à connaître
+
+- **Animation, calée sur le modèle Heron** : chez eux le panneau fait un `slideDown` — une seule propriété animée, la hauteur, sans fondu ni translation du contenu — et l'image passe en `scale(1.04) → 1` + opacité sur 0,4 s. Ici aussi : la hauteur du panneau est écrite en pixels par le JS, de la valeur mesurée vers la cible, en 0,4 s sur `cubic-bezier(0.33, 1, 0.68, 1)` (l'équivalent CSS de `power2.out`). Rien d'autre n'est animé.
+- **Ouverture et fermeture sont simultanées par construction** : un clic traite d'un bloc la ligne qui se ferme et celle qui s'ouvre — hauteurs de départ, bascule des classes, un seul recalcul de style, puis les hauteurs d'arrivée. Les deux transitions démarrent donc dans la même frame.
+- Éviter les courbes très amorties (`expo.out`, `quint.out`) proposées dans **Courbe du dépliement** : elles placent 80 % de la course dans les premières dizaines de millisecondes puis traînent, et l'ouverture/fermeture simultanée se lit alors en deux temps. Réglables : **Durée du dépliement** et **Courbe du dépliement** (Style > Contenu déplié), **Transition** et sa durée pour l'image.
+- Le rognage (`overflow:hidden`) est porté par `.bb-acc-panel` : c'est lui qui produit le glissé. À la fin du dépliement, la hauteur en pixels est rendue à `auto`, pour que le panneau suive ensuite son contenu (image chargée après coup, changement de largeur).
+- À la fin de chaque dépliement, `ScrollTrigger.refresh()` est appelé s'il est présent, pour que les sections épinglées de la page restent calées.
+- Les widgets fonctionnent dans l'éditeur Elementor : leurs CSS et JS sont chargés par `get_style_depends()` / `get_script_depends()`, y compris dans l'aperçu où le reste du plugin est volontairement à l'arrêt.
+- Accessibilité : chaque titre est un `<button>` avec `aria-expanded` / `aria-controls`, navigation au clavier par flèches haut/bas, `Début`/`Fin`, contenu replié retiré du parcours (`visibility:hidden`). `prefers-reduced-motion` coupe les transitions.
+- Les classes `bb-reveal`, `bb-split`… se posent normalement sur ces widgets ou sur leurs conteneurs, comme sur n'importe quel élément Elementor.
+
 ## Réglages dans l'admin
 
 **Réglages > BB Scroll Reveal** (capacité `manage_options`). Tous les réglages globaux y sont accessibles sans passer par `functions.php`.
@@ -269,6 +396,23 @@ Un seul des deux suffit ; `normalizeScroll` est ignoré si `smooth` est actif.
 - **Performance** : seules `transform` et `opacity` sont animées. Éviter `bb-scrub` / `bb-parallax` sur des dizaines d'éléments d'une même page.
 
 ## Historique
+
+**1.10.0**
+- Vidéo lue au scroll : classe `bb-video-scroll` et widget Elementor **BB Vidéo au scroll**. La vidéo (MP4/WebM hébergé) avance et recule avec le scroll, épinglée par défaut, avec arrêts sur image (`data-bb-holds`), textes superposés calés sur la vidéo (`bb-video-text` + `data-bb-at`) et boutons lecture/pause en option. Chargement complet en mémoire par défaut pour un scrub fluide, repli en flux si le serveur le refuse. Voir « Vidéo lue au scroll » plus haut, dont la consigne d'encodage ffmpeg.
+- Nouveau fichier `assets/bb-video.css`, chargé par le seul widget. L'animation est dans `bb-reveal.js` : le widget ne produit que le balisage et ses `data-bb-*`. Aucune nouvelle clé de configuration, `window.BB_REVEAL` inchangé.
+- Page de réglages, onglet **Classes et attributs** : entrées de la vidéo au scroll (nouvelle famille, en rose).
+
+**1.9.1**
+- Widgets : le dépliement n'anime plus `grid-template-rows` (0fr → 1fr) mais la hauteur en pixels, posée par le JS. L'interpolation des pistes flexibles n'est pas fiable partout ; là où elle ne s'applique pas, la hauteur sautait pendant que le fondu du contenu continuait — le mouvement se lisait en deux temps. Le fondu et la translation du contenu sont supprimés : comme chez Heron, une seule propriété est animée.
+- Ouverture et fermeture d'un même clic sont traitées en un seul lot (hauteurs de départ, classes, un recalcul de style, hauteurs d'arrivée) : les deux transitions démarrent dans la même frame.
+- Couleur des titres : la propriété `color` est écrite en dur par le contrôle Elementor, et plus seulement via une variable CSS. La règle qui la consommait n'avait qu'un niveau de classe, et le `button { color }` de la plupart des thèmes passait devant — le réglage restait sans effet.
+
+**1.9.0**
+- Module de widgets Elementor, chargé uniquement quand Elementor est actif : **BB Liste dépliante** et **BB Image liée**, appariés par un identifiant de liaison. La liste porte les images de ses éléments ; le cadre image affiche celle de l'élément ouvert. Deux widgets et non un seul pour laisser la mise en page (colonnes, contenu libre au-dessus de la liste) entièrement à Elementor. Voir « Widgets Elementor » plus haut.
+- Nouveaux fichiers `assets/bb-accordion.css` et `assets/bb-accordion.js`, chargés par les seuls widgets qui les demandent (`get_style_depends()` / `get_script_depends()`), éditeur compris. Aucun changement sur le front « classes CSS » : `window.BB_REVEAL`, les réglages et `bb-reveal.js` sont inchangés.
+
+**1.8.1**
+- Sections épinglées (`bb-steps`, `bb-hscroll`) : plus de saut à l'épinglage avec Lenis. `anticipatePin` (pré-épinglage selon la vitesse de scroll) figeait la section plusieurs dizaines de px avant son point de départ ; il n'est conservé qu'en défilement natif (`smooth` désactivé).
 
 **1.8.0**
 - Refonte de la page de réglages sur le design system des plugins maison (celui de DC Support Technique) : header de marque, onglets en colonne, cards, interrupteurs, barre d'enregistrement collante avec état « modifications non enregistrées », colonne d'aide contextuelle et état du front.

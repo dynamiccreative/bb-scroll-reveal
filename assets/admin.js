@@ -1,5 +1,5 @@
 /**
- * BB Scroll Reveal 1.8.0 — page Réglages.
+ * BB Scroll Reveal 1.8.1 — page Réglages.
  *
  * Trois comportements, en ES5 comme le reste du plugin (aucun build) :
  *   1. onglets côté client — tous les champs restent dans un seul formulaire,

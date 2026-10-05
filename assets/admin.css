@@ -415,6 +415,7 @@ body.folded .bbsr-savebar { left: 36px; }
 .bbsr-ico[data-tone="amber"]  { background: var(--bbsr-orange-soft); color: #b45309; }
 .bbsr-ico[data-tone="green"]  { background: var(--bbsr-green-soft);  color: #15803d; }
 .bbsr-ico[data-tone="violet"] { background: #f3e9fd; color: #7c3aed; }
+.bbsr-ico[data-tone="rose"]   { background: #fde8ef; color: #be185d; }
 
 /* Légende des teintes, sous les deux tables. */
 .bbsr-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 2px; font-size: 11px; color: var(--bbsr-faint); }
@@ -424,6 +425,7 @@ body.folded .bbsr-savebar { left: 36px; }
 .bbsr-legend [data-tone="amber"] i  { background: #b45309; }
 .bbsr-legend [data-tone="green"] i  { background: #15803d; }
 .bbsr-legend [data-tone="violet"] i { background: #7c3aed; }
+.bbsr-legend [data-tone="rose"] i   { background: #be185d; }
 
 /* ===========================================================================
    RESPONSIVE

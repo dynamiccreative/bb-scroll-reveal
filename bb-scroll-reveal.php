@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       BB Scroll Reveal
  * Description:       Révélations au scroll (GSAP + ScrollTrigger + SplitText, Lenis en option) pilotées par classes CSS dans Elementor.
- * Version:           1.8.0
+ * Version:           1.10.0
  * Author:            bleuebuzz
  * Requires at least: 6.3
  * Requires PHP:      7.4
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BB_REVEAL_VERSION', '1.8.0' );
+define( 'BB_REVEAL_VERSION', '1.10.0' );
 define( 'BB_REVEAL_GSAP_VERSION', '3.15.0' );
 define( 'BB_REVEAL_LENIS_VERSION', '1.3.26' );
 define( 'BB_REVEAL_URL', plugin_dir_url( __FILE__ ) );
@@ -38,6 +38,25 @@ if ( is_admin() ) {
 		}
 	);
 }
+
+/**
+ * Widgets Elementor (BB Liste dépliante + BB Image liée, BB Vidéo au scroll). Module optionnel :
+ * chargé seulement si Elementor est actif, et dont rien d'autre ne dépend.
+ * Priorité 20 : Elementor déclenche « elementor/loaded » au chargement de son
+ * fichier principal, donc avant plugins_loaded.
+ */
+add_action(
+	'plugins_loaded',
+	static function () {
+		if ( ! did_action( 'elementor/loaded' ) ) {
+			return;
+		}
+
+		require_once BB_REVEAL_PATH . 'includes/elementor/class-bb-reveal-elementor.php';
+		BB_Reveal_Elementor::init();
+	},
+	20
+);
 
 /**
  * Valeurs par défaut, dans le code. Elles ne sont jamais écrites en base :
@@ -202,12 +221,12 @@ d.documentElement.classList.add('bb-js');
 setTimeout(function(){if(!window.bbRevealReady){d.documentElement.classList.remove('bb-js');}},3500);})(document);
 </script>
 <style id="bb-reveal-guard-css">
-html.bb-js .bb-reveal,html.bb-js .bb-reveal-children,html.bb-js .bb-split,html.bb-js .bb-step,html.bb-js .bb-hscroll{visibility:hidden}
+html.bb-js .bb-reveal,html.bb-js .bb-reveal-children,html.bb-js .bb-split,html.bb-js .bb-step,html.bb-js .bb-hscroll,html.bb-js .bb-video-text{visibility:hidden}
 /* Elementor pose transition:transform var(--e-con-transform-transition-duration,.4s) sur tout
    conteneur (.e-con) : chaque frame GSAP serait lissée sur 0,4 s (saccades), et le translateY posé
    par ScrollTrigger au dépin serait animé (la section « remonte puis redescend »). Neutralisé sur
    les éléments animés et sur la section épinglée via la variable qu'Elementor lit. */
-.bb-steps,.bb-steps .e-con,.bb-step,.bb-hscroll,.bb-hscroll .e-con,.bb-hpanel,.bb-reveal,.bb-reveal-children>*,.bb-reveal-children>.e-con-inner>*,.bb-split,.bb-scrub,.bb-parallax{--e-con-transform-transition-duration:0s!important;--transform-transition:0s!important}
+.bb-steps,.bb-steps .e-con,.bb-step,.bb-hscroll,.bb-hscroll .e-con,.bb-hpanel,.bb-reveal,.bb-reveal-children>*,.bb-reveal-children>.e-con-inner>*,.bb-split,.bb-scrub,.bb-parallax,.bb-video-scroll,.bb-video-scroll .e-con,.bb-video-box{--e-con-transform-transition-duration:0s!important;--transform-transition:0s!important}
 .bb-steps-clip{overflow:hidden}
 /* bb-hscroll : la section est le cadre visible, la piste la déborde à droite (ou à gauche en rtl). */
 .bb-hscroll-clip{overflow:hidden}
