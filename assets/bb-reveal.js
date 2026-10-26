@@ -1,5 +1,5 @@
 /*!
- * BB Scroll Reveal 1.10.0 — bleuebuzz
+ * BB Scroll Reveal 1.10.1 — bleuebuzz
  * Classes à poser dans Elementor > Avancé > Classes CSS :
  *   bb-reveal           élément révélé (fade + translation) une fois
  *   bb-reveal-children  enfants directs d'un conteneur révélés en cascade
@@ -1031,7 +1031,9 @@
 		if (cfg.smooth && window.Lenis) {
 			// lerp : part du chemin parcourue à chaque frame (0,1 = réactif, 0,05 = très doux).
 			// Réglable via $cfg['lenis'] = ['lerp' => 0.07, 'wheelMultiplier' => 1].
-			var lenis = new window.Lenis(Object.assign({ lerp: 0.07, wheelMultiplier: 1, anchors: true }, cfg.lenis || {}));
+			// allowNestedScroll : une zone défilante sous la souris (panneau, menu, liste) défile elle-même,
+			// au lieu que Lenis capte la molette et fasse défiler la page.
+			var lenis = new window.Lenis(Object.assign({ lerp: 0.07, wheelMultiplier: 1, anchors: true, allowNestedScroll: true }, cfg.lenis || {}));
 			window.bbLenis = lenis;
 			lenis.on('scroll', ScrollTrigger.update);
 			gsap.ticker.add(function (time) { lenis.raf(time * 1000); });

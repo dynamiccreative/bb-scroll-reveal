@@ -390,12 +390,16 @@ Un seul des deux suffit ; `normalizeScroll` est ignoré si `smooth` est actif.
 
 - **Plugins de cache** (WP Rocket « Retarder l'exécution JS », LiteSpeed, Perfmatters) : exclure `bb-reveal`, `gsap`, `ScrollTrigger`, `SplitText`, `lenis` ainsi que le script inline `bb-reveal-guard`. Sinon les blocs restent masqués ~3,5 s (filet de sécurité) jusqu'à interaction.
 - **Lenis + ancres Elementor** : l'option `anchors` de Lenis gère les liens `#ancre`, mais tester les menus one-page et le header sticky avant mise en prod.
+- **Lenis + zones défilantes** (1.10.1) : `allowNestedScroll` est actif, une zone qui défile elle-même (panneau latéral, menu, liste déroulante) reçoit la molette au lieu de la page. Pour une zone qui ne doit jamais céder la molette à la page, poser `data-lenis-prevent` dessus. Se coupe avec `$cfg['lenis']['allowNestedScroll'] = false;` (Lenis teste alors moins d'éléments à chaque cran de molette).
 - **Accessibilité** : `prefers-reduced-motion` désactive toutes les animations, contenu affiché directement.
 - **Éditeur Elementor** : aucune animation dans l'aperçu, les blocs restent éditables.
 - **Épinglage (bb-steps)** : aucun conteneur parent de la section ne doit avoir de `transform`, de `filter` ni d'effet de mouvement Elementor, sinon l'épinglage décroche. Ne pas mettre `bb-reveal` ou `bb-split` sur les étapes elles-mêmes : c'est la section qui les pilote. **À l'intérieur** d'une étape en revanche, `bb-reveal`, `bb-reveal-children` et `bb-split` sont pilotés par l'étape (1.4.x) : lancés dès le début de sa montée et acquis ensuite, comme chez Heron. `data-bb-replay` sur la section (ou une étape) les rembobine dès que l'étape repart en arrière. `data-bb-delay` et `data-bb-stagger` s'appliquent normalement — un délai de 0,3–0,4 s laisse la carte arriver avant le texte.
 - **Performance** : seules `transform` et `opacity` sont animées. Éviter `bb-scrub` / `bb-parallax` sur des dizaines d'éléments d'une même page.
 
 ## Historique
+
+**1.10.1**
+- Lenis : `allowNestedScroll` actif par défaut. Lenis captait la molette partout, et une zone défilante de la page (panneau latéral, menu, liste) ne défilait plus : c'était la page qui bougeait. Se coupe via `$cfg['lenis']['allowNestedScroll'] = false;`. `window.BB_REVEAL` inchangé (le défaut est dans `bb-reveal.js`).
 
 **1.10.0**
 - Vidéo lue au scroll : classe `bb-video-scroll` et widget Elementor **BB Vidéo au scroll**. La vidéo (MP4/WebM hébergé) avance et recule avec le scroll, épinglée par défaut, avec arrêts sur image (`data-bb-holds`), textes superposés calés sur la vidéo (`bb-video-text` + `data-bb-at`) et boutons lecture/pause en option. Chargement complet en mémoire par défaut pour un scrub fluide, repli en flux si le serveur le refuse. Voir « Vidéo lue au scroll » plus haut, dont la consigne d'encodage ffmpeg.
