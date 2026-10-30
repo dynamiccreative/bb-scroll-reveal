@@ -1,9 +1,13 @@
 <?php
 /**
  * Plugin Name:       BB Scroll Reveal
+ * Plugin URI:        https://github.com/dynamiccreative/bb-scroll-reveal
+ * Update URI:        https://github.com/dynamiccreative/bb-scroll-reveal
  * Description:       Révélations au scroll (GSAP + ScrollTrigger + SplitText, Lenis en option) pilotées par classes CSS dans Elementor.
- * Version:           1.10.1
- * Author:            bleuebuzz
+ * Version:           1.11.0
+ * Author:            Team bleuebuzz
+ * Author URI:        https://www.bleuebuzz.fr/
+ * Primary Branch:    main
  * Requires at least: 6.3
  * Requires PHP:      7.4
  * License:           GPL-2.0-or-later
@@ -12,11 +16,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BB_REVEAL_VERSION', '1.10.1' );
+define( 'BB_REVEAL_VERSION', '1.11.0' );
 define( 'BB_REVEAL_GSAP_VERSION', '3.15.0' );
 define( 'BB_REVEAL_LENIS_VERSION', '1.3.26' );
 define( 'BB_REVEAL_URL', plugin_dir_url( __FILE__ ) );
 define( 'BB_REVEAL_PATH', plugin_dir_path( __FILE__ ) );
+define( 'BB_REVEAL_FILE', __FILE__ );
 
 if ( is_admin() ) {
 	require_once BB_REVEAL_PATH . 'includes/class-bb-reveal-settings.php';
@@ -37,6 +42,42 @@ if ( is_admin() ) {
 			return $links;
 		}
 	);
+
+	/** Icône du plugin après « Afficher les détails », liée au dépôt GitHub (Plugin URI). */
+	add_filter(
+		'plugin_row_meta',
+		static function ( array $links, string $file, array $plugin_data ): array {
+			if ( plugin_basename( BB_REVEAL_FILE ) === $file ) {
+				$links[] = sprintf(
+					'<a href="%s" target="_blank" rel="noopener"><img src="%s" alt="%s" width="16" height="16" style="vertical-align:middle;border-radius:3px"></a>',
+					esc_url( $plugin_data['PluginURI'] ?? '' ),
+					esc_url( BB_REVEAL_URL . 'assets/img/icon.svg' ),
+					esc_attr__( 'BB Scroll Reveal', 'bb-scroll-reveal' )
+				);
+			}
+
+			return $links;
+		},
+		10,
+		3
+	);
+}
+
+/**
+ * Mises à jour depuis le dépôt GitHub public (branche main, aucun jeton) : lues
+ * dans l'en-tête Update URI. Hors is_admin() : WordPress vérifie aussi les
+ * mises à jour par le cron.
+ *
+ * La lib exige PHP 8.0 (arguments nommés, match) : sous PHP 7.4 elle n'est pas
+ * chargée — le plugin fonctionne, sans mise à jour automatique.
+ */
+if ( PHP_VERSION_ID >= 80000 ) {
+	require_once BB_REVEAL_PATH . 'lib/GitHubUpdater.php';
+	( new BB_Reveal_GitHubUpdater( BB_REVEAL_FILE ) )
+		->setPluginIcon( 'assets/img/icon.svg' )
+		->setPluginBannerSmall( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
+		->setPluginBannerLarge( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
+		->add();
 }
 
 /**

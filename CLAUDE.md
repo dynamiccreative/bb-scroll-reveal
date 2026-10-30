@@ -17,6 +17,9 @@ seulement si Elementor est actif ; le front « classes CSS » n'en dépend pas.
 | `includes/elementor/widgets/class-bb-reveal-widget-accordion-media.php` | Widget « BB Image liée » (`bb_accordion_media`) : cadre image piloté par la liste de même identifiant de liaison. |
 | `includes/elementor/widgets/class-bb-reveal-widget-video-scroll.php` | Widget « BB Vidéo au scroll » (`bb_video_scroll`) : produit `.bb-video-box` + `<video>` et ses `data-bb-*` ; l'animation est celle de `bb-video-scroll` dans `bb-reveal.js`. Style : `assets/bb-video.css`. |
 | `assets/bb-accordion.css`, `assets/bb-accordion.js` | Front des deux widgets (préfixe `bb-acc-`). Chargés par `get_style_depends()` / `get_script_depends()`, éditeur compris. Indépendants de GSAP et de `bb-reveal.js`. |
+| `lib/GitHubUpdater.php` | Lib de mise à jour depuis GitHub (Ryan Sechrest 1.2.2, patch DC des URL absolues, classe renommée `BB_Reveal_GitHubUpdater`). Lit l'en-tête `Update URI` ; branche `main`, dépôt public, sans jeton. PHP ≥ 8.0 : chargée derrière `PHP_VERSION_ID >= 80000`. |
+| `assets/img/icon.svg` | Icône (cartouche « BB » tracé, sans police) : écran des mises à jour et ligne du plugin après « Afficher les détails ». |
+| `assets/fonts/sora-latin.woff2` | Sora du logo de la page de réglages (copie de celle de Project Plus). |
 | `assets/vendor/` | gsap, ScrollTrigger, SplitText, lenis (+ lenis.css). Ne pas modifier. |
 | `README.md` | Documentation utilisateur (classes, attributs, prérequis, historique). À tenir à jour à chaque changement de comportement. |
 

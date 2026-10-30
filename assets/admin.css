@@ -10,7 +10,7 @@
 
    Palette BB Scroll Reveal :
      primary #4f46e5   indigo (actions, onglet actif, focus)
-     accent  #22d3ee   cyan   (halo du header, dégradé du logo)
+     accent  #22d3ee   cyan   (halo du header)
      ok #16a34a · warn #d97706 · danger #dc2626
 
    Convention : classes préfixées `bbsr-`, actives sous le conteneur `.bbsr-ui`.
@@ -84,17 +84,23 @@
 }
 .bbsr-header-left  { display: flex; align-items: center; gap: 13px; }
 .bbsr-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.bbsr-logo {
-	width: 40px; height: 40px;
-	background: linear-gradient(135deg, var(--bbsr-accent), var(--bbsr-primary));
-	border-radius: 11px;
-	display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-	box-shadow: 0 4px 12px -3px rgba(var(--bbsr-accent-rgb), .5);
+/* Logo de la gamme BB : cartouche « BB » devant le mot, en Sora hébergée en
+   local (police variable, graisses 400 à 700). Variante sur fond sombre :
+   dégradé clair, lettres sombres. */
+@font-face {
+	font-family: "Sora"; font-style: normal; font-weight: 400 700; font-display: swap;
+	src: url("fonts/sora-latin.woff2") format("woff2");
 }
-.bbsr-logo .dashicons { color: #fff; font-size: 21px; width: 21px; height: 21px; }
-.bbsr-header h1 {
-	font-size: 15px; font-weight: 650; color: #fff;
-	margin: 0 0 1px; padding: 0; line-height: 1.2; letter-spacing: .1px;
+.bbsr-header h1.bbsr-marque {
+	display: inline-flex; align-items: center; gap: .24em;
+	font-family: "Sora", system-ui, -apple-system, sans-serif;
+	font-size: 21px; font-weight: 600; color: #e2e8f0;
+	margin: 0 0 4px; padding: 0; line-height: 1; letter-spacing: -.015em; white-space: nowrap;
+}
+.bbsr-cartouche {
+	font-weight: 700; letter-spacing: -.01em; color: #0b1024;
+	background: linear-gradient(135deg, #60a5fa, #a78bfa);
+	padding: .13em .3em .17em; border-radius: .2em;
 }
 .bbsr-header p { font-size: 12px; color: rgba(255,255,255,.62); margin: 0; }
 

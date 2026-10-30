@@ -6,6 +6,10 @@ Révélations au scroll façon GSAP/Webflow dans Elementor, pilotées par classe
 
 Dézipper dans `wp-content/plugins/`, activer. Rien d'autre à configurer : les valeurs par défaut conviennent à la plupart des sites. Pour les ajuster sans toucher au code, voir « Réglages dans l'admin » plus bas.
 
+### Mises à jour
+
+Le plugin se met à jour depuis le dépôt GitHub public [dynamiccreative/bb-scroll-reveal](https://github.com/dynamiccreative/bb-scroll-reveal), branche `main`, comme une extension du répertoire WordPress : aucun jeton à saisir. La version proposée est celle de l'en-tête `Version` du fichier principal sur `main` ; le dossier du plugin doit rester `bb-scroll-reveal`. La mise à jour automatique demande PHP 8.0 ou plus (lib `lib/GitHubUpdater.php`) ; sous PHP 7.4 le plugin fonctionne, mais se met à jour à la main.
+
 ## Utilisation dans Elementor
 
 Onglet **Avancé > Classes CSS** de l'élément :
@@ -397,6 +401,11 @@ Un seul des deux suffit ; `normalizeScroll` est ignoré si `smooth` est actif.
 - **Performance** : seules `transform` et `opacity` sont animées. Éviter `bb-scrub` / `bb-parallax` sur des dizaines d'éléments d'une même page.
 
 ## Historique
+
+**1.11.0**
+- Mises à jour automatiques depuis le dépôt GitHub public (`lib/GitHubUpdater.php`, branche `main`, sans jeton). En-têtes `Plugin URI`, `Update URI`, `Author: Team bleuebuzz`, `Author URI` et `Primary Branch: main`. Chargée seulement sous PHP 8.0 ou plus.
+- Icône du plugin (`assets/img/icon.svg`, cartouche « BB ») après « Afficher les détails » dans la liste des extensions, et dans l'écran des mises à jour.
+- Page de réglages : nouveau logo de la gamme BB (cartouche « BB » devant « Scroll Reveal », en Sora hébergée dans `assets/fonts/`). `window.BB_REVEAL` inchangé.
 
 **1.10.1**
 - Lenis : `allowNestedScroll` actif par défaut. Lenis captait la molette partout, et une zone défilante de la page (panneau latéral, menu, liste) ne défilait plus : c'était la page qui bougeait. Se coupe via `$cfg['lenis']['allowNestedScroll'] = false;`. `window.BB_REVEAL` inchangé (le défaut est dans `bb-reveal.js`).

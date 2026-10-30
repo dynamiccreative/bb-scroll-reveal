@@ -320,9 +320,8 @@ final class BB_Reveal_Settings {
 
 			<div class="bbsr-header">
 				<div class="bbsr-header-left">
-					<div class="bbsr-logo"><span class="dashicons dashicons-visibility"></span></div>
 					<div>
-						<h1><?php esc_html_e( 'BB Scroll Reveal', 'bb-scroll-reveal' ); ?></h1>
+						<h1 class="bbsr-marque"><span class="bbsr-cartouche">BB</span> Scroll Reveal</h1>
 						<p><?php esc_html_e( 'Révélations au scroll pilotées par classes CSS dans Elementor', 'bb-scroll-reveal' ); ?></p>
 					</div>
 				</div>
