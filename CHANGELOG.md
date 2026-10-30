@@ -7,7 +7,7 @@ Le format suit Keep a Changelog et le projet adhère au Semantic Versioning. Les
 ## [1.11.0] — 2026-10-30
 
 ### Ajouté
-- **Mises à jour automatiques** depuis le dépôt GitHub public (`lib/GitHubUpdater.php`, branche `master`, sans jeton), avec ce changelog dans la fenêtre de détails de la mise à jour. En-têtes `Plugin URI`, `Update URI`, `Author: Team bleuebuzz`, `Author URI` et `Primary Branch: master`.
+- **Mises à jour automatiques** depuis le dépôt GitHub public (`lib/GitHubUpdater.php`, branche `main`, sans jeton), avec ce changelog dans la fenêtre de détails de la mise à jour. En-têtes `Plugin URI`, `Update URI`, `Author: Team bleuebuzz`, `Author URI` et `Primary Branch: main`.
 - **Icône du plugin** (`assets/img/icon.svg`, cartouche « BB ») après « Afficher les détails » dans la liste des extensions, et dans l'écran des mises à jour.
 
 ### Modifié

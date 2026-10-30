@@ -8,7 +8,7 @@ Dézipper dans `wp-content/plugins/`, activer. Rien d'autre à configurer : les 
 
 ### Mises à jour
 
-Le plugin se met à jour depuis le dépôt GitHub public [dynamiccreative/bb-scroll-reveal](https://github.com/dynamiccreative/bb-scroll-reveal), branche `master`, comme une extension du répertoire WordPress : aucun jeton à saisir. La version proposée est celle de l'en-tête `Version` du fichier principal sur `master` ; le dossier du plugin doit rester `bb-scroll-reveal`.
+Le plugin se met à jour depuis le dépôt GitHub public [dynamiccreative/bb-scroll-reveal](https://github.com/dynamiccreative/bb-scroll-reveal), branche `main`, comme une extension du répertoire WordPress : aucun jeton à saisir. La version proposée est celle de l'en-tête `Version` du fichier principal sur `main` ; le dossier du plugin doit rester `bb-scroll-reveal`.
 
 Prérequis : PHP 8.0 (exigé par `lib/GitHubUpdater.php`), WordPress 6.3.
 
