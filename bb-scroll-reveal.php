@@ -7,7 +7,7 @@
  * Version:           1.11.0
  * Author:            Team bleuebuzz
  * Author URI:        https://www.bleuebuzz.fr/
- * Primary Branch:    main
+ * Primary Branch:    master
  * Requires at least: 6.3
  * Requires PHP:      8.0
  * License:           GPL-2.0-or-later
@@ -64,22 +64,20 @@ if ( is_admin() ) {
 }
 
 /**
- * Mises à jour depuis le dépôt GitHub public (branche main, aucun jeton) : lues
- * dans l'en-tête Update URI. Hors is_admin() : WordPress vérifie aussi les
- * mises à jour par le cron.
+ * Mises à jour depuis le dépôt GitHub public (aucun jeton) : lues dans l'en-tête
+ * Update URI. Hors is_admin() : WordPress vérifie aussi les mises à jour par le cron.
  *
- * La lib exige PHP 8.0 (arguments nommés, match) : sous PHP 7.4 elle n'est pas
- * chargée — le plugin fonctionne, sans mise à jour automatique.
+ * La lib ignore l'en-tête Primary Branch et prend « main » par défaut : la
+ * branche est donc redonnée ici, les deux doivent rester d'accord.
  */
-if ( PHP_VERSION_ID >= 80000 ) {
-	require_once BB_REVEAL_PATH . 'lib/GitHubUpdater.php';
-	( new BB_Reveal_GitHubUpdater( BB_REVEAL_FILE ) )
-		->setPluginIcon( 'assets/img/icon.svg' )
-		->setPluginBannerSmall( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
-		->setPluginBannerLarge( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
-		->setChangelog( 'CHANGELOG.md' )
-		->add();
-}
+require_once BB_REVEAL_PATH . 'lib/GitHubUpdater.php';
+( new BB_Reveal_GitHubUpdater( BB_REVEAL_FILE ) )
+	->setBranch( 'master' )
+	->setPluginIcon( 'assets/img/icon.svg' )
+	->setPluginBannerSmall( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
+	->setPluginBannerLarge( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
+	->setChangelog( 'CHANGELOG.md' )
+	->add();
 
 /**
  * Widgets Elementor (BB Liste dépliante + BB Image liée, BB Vidéo au scroll). Module optionnel :

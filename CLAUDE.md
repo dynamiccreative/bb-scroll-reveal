@@ -17,7 +17,7 @@ seulement si Elementor est actif ; le front « classes CSS » n'en dépend pas.
 | `includes/elementor/widgets/class-bb-reveal-widget-accordion-media.php` | Widget « BB Image liée » (`bb_accordion_media`) : cadre image piloté par la liste de même identifiant de liaison. |
 | `includes/elementor/widgets/class-bb-reveal-widget-video-scroll.php` | Widget « BB Vidéo au scroll » (`bb_video_scroll`) : produit `.bb-video-box` + `<video>` et ses `data-bb-*` ; l'animation est celle de `bb-video-scroll` dans `bb-reveal.js`. Style : `assets/bb-video.css`. |
 | `assets/bb-accordion.css`, `assets/bb-accordion.js` | Front des deux widgets (préfixe `bb-acc-`). Chargés par `get_style_depends()` / `get_script_depends()`, éditeur compris. Indépendants de GSAP et de `bb-reveal.js`. |
-| `lib/GitHubUpdater.php` | Lib de mise à jour depuis GitHub (Ryan Sechrest 1.2.2, patch DC des URL absolues, classe renommée `BB_Reveal_GitHubUpdater`). Lit l'en-tête `Update URI` ; branche `main`, dépôt public, sans jeton. PHP ≥ 8.0 : chargée derrière `PHP_VERSION_ID >= 80000`. |
+| `lib/GitHubUpdater.php` | Lib de mise à jour depuis GitHub (Ryan Sechrest 1.2.2, patch DC des URL absolues, classe renommée `BB_Reveal_GitHubUpdater`). Lit l'en-tête `Update URI` ; dépôt public, sans jeton. Ignore `Primary Branch` : la branche `master` est passée par `setBranch()`, à garder d'accord avec l'en-tête. |
 | `assets/img/icon.svg` | Icône (cartouche « BB » tracé, sans police) : écran des mises à jour et ligne du plugin après « Afficher les détails ». |
 | `assets/fonts/sora-latin.woff2` | Sora du logo de la page de réglages (copie de celle de Project Plus). |
 | `assets/vendor/` | gsap, ScrollTrigger, SplitText, lenis (+ lenis.css). Ne pas modifier. |
@@ -26,10 +26,10 @@ seulement si Elementor est actif ; le front « classes CSS » n'en dépend pas.
 
 ## Conventions
 
-- PHP ≥ 7.4, WordPress ≥ 6.3. Fonctions préfixées `bb_reveal_`, constantes `BB_REVEAL_*`, text domain `bb-scroll-reveal`, `defined( 'ABSPATH' ) || exit`.
+- PHP ≥ 8.0 (imposé par GitHubUpdater), WordPress ≥ 6.3. Fonctions préfixées `bb_reveal_`, constantes `BB_REVEAL_*`, text domain `bb-scroll-reveal`, `defined( 'ABSPATH' ) || exit`.
 - Style WordPress (tabulations, espaces dans les parenthèses, `esc_*` en sortie, nonce + capability en entrée). `php -l` doit passer.
 - JS : ES5 (`var`, `function`), pas de build. Tout réglage global transite par `window.BB_REVEAL` → `cfg`. Les réglages par élément passent par `data-bb-*` dans Elementor, jamais par l'admin.
-- Le numéro de version est à incrémenter à trois endroits : en-tête du plugin, `BB_REVEAL_VERSION`, en-tête de `bb-reveal.js` (et, quand ils changent, les en-têtes de `bb-accordion.css` / `bb-accordion.js`). Ajouter une entrée en tête de `CHANGELOG.md` (format Keep a Changelog : `## [x.y.z] — AAAA-MM-JJ`, rubriques Ajouté / Modifié / Corrigé), lu par GitHubUpdater depuis `main` pour la fenêtre de détails.
+- Le numéro de version est à incrémenter à trois endroits : en-tête du plugin, `BB_REVEAL_VERSION`, en-tête de `bb-reveal.js` (et, quand ils changent, les en-têtes de `bb-accordion.css` / `bb-accordion.js`). Ajouter une entrée en tête de `CHANGELOG.md` (format Keep a Changelog : `## [x.y.z] — AAAA-MM-JJ`, rubriques Ajouté / Modifié / Corrigé), lu par GitHubUpdater depuis `master` pour la fenêtre de détails.
 - Ne jamais casser le filtre `bb_reveal_config` : du code dans un thème peut s'en servir.
 
 ## Clés de configuration (`bb_reveal_config()`)
