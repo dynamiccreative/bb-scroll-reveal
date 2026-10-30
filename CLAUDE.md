@@ -21,14 +21,15 @@ seulement si Elementor est actif ; le front « classes CSS » n'en dépend pas.
 | `assets/img/icon.svg` | Icône (cartouche « BB » tracé, sans police) : écran des mises à jour et ligne du plugin après « Afficher les détails ». |
 | `assets/fonts/sora-latin.woff2` | Sora du logo de la page de réglages (copie de celle de Project Plus). |
 | `assets/vendor/` | gsap, ScrollTrigger, SplitText, lenis (+ lenis.css). Ne pas modifier. |
-| `README.md` | Documentation utilisateur (classes, attributs, prérequis, historique). À tenir à jour à chaque changement de comportement. |
+| `README.md` | Documentation utilisateur (classes, attributs, prérequis). À tenir à jour à chaque changement de comportement. |
+| `CHANGELOG.md` | Historique des versions (Keep a Changelog), affiché dans la fenêtre de détails de la mise à jour. |
 
 ## Conventions
 
 - PHP ≥ 7.4, WordPress ≥ 6.3. Fonctions préfixées `bb_reveal_`, constantes `BB_REVEAL_*`, text domain `bb-scroll-reveal`, `defined( 'ABSPATH' ) || exit`.
 - Style WordPress (tabulations, espaces dans les parenthèses, `esc_*` en sortie, nonce + capability en entrée). `php -l` doit passer.
 - JS : ES5 (`var`, `function`), pas de build. Tout réglage global transite par `window.BB_REVEAL` → `cfg`. Les réglages par élément passent par `data-bb-*` dans Elementor, jamais par l'admin.
-- Le numéro de version est à incrémenter à trois endroits : en-tête du plugin, `BB_REVEAL_VERSION`, en-tête de `bb-reveal.js` (et, quand ils changent, les en-têtes de `bb-accordion.css` / `bb-accordion.js`). Ajouter une entrée dans « Historique » du README.
+- Le numéro de version est à incrémenter à trois endroits : en-tête du plugin, `BB_REVEAL_VERSION`, en-tête de `bb-reveal.js` (et, quand ils changent, les en-têtes de `bb-accordion.css` / `bb-accordion.js`). Ajouter une entrée en tête de `CHANGELOG.md` (format Keep a Changelog : `## [x.y.z] — AAAA-MM-JJ`, rubriques Ajouté / Modifié / Corrigé), lu par GitHubUpdater depuis `main` pour la fenêtre de détails.
 - Ne jamais casser le filtre `bb_reveal_config` : du code dans un thème peut s'en servir.
 
 ## Clés de configuration (`bb_reveal_config()`)

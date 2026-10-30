@@ -9,7 +9,7 @@
  * Author URI:        https://www.bleuebuzz.fr/
  * Primary Branch:    main
  * Requires at least: 6.3
- * Requires PHP:      7.4
+ * Requires PHP:      8.0
  * License:           GPL-2.0-or-later
  * Text Domain:       bb-scroll-reveal
  */
@@ -77,6 +77,7 @@ if ( PHP_VERSION_ID >= 80000 ) {
 		->setPluginIcon( 'assets/img/icon.svg' )
 		->setPluginBannerSmall( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
 		->setPluginBannerLarge( 'https://raw.githubusercontent.com/dynamiccreative/setting-plugin/main/img/banner-1544x500.png' )
+		->setChangelog( 'CHANGELOG.md' )
 		->add();
 }
 
